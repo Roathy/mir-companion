@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../welcome_tour_page.dart';
 
@@ -7,10 +10,12 @@ final currentIndexPage = StateProvider<int>((ref) => 0);
 
 class SlideShow extends StatelessWidget {
   final List<Widget> slides;
+  final bool isLastSlide;
 
   const SlideShow({
     super.key,
     required this.slides,
+    required this.isLastSlide,
   });
 
   @override
@@ -32,6 +37,7 @@ class _SlideShow extends ConsumerStatefulWidget {
 
 class _SlideShowState extends ConsumerState<_SlideShow> {
   late final PageController pageViewController;
+  bool _showTour = false;
 
   @override
   void initState() {
@@ -48,10 +54,72 @@ class _SlideShowState extends ConsumerState<_SlideShow> {
     super.dispose();
   }
 
+  void _onPageChanged(int index) {
+    if (index == widget.slides.length - 1) {
+      _showLastPageDialog();
+    }
+  }
+
+  // Save preference
+  Future<void> _savePreference(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('dontShowTour', value);
+  }
+
+  void _showLastPageDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Text("You're on the last page!"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text("Do you want to continue?"),
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: _showTour,
+                        onChanged: (value) {
+                          setDialogState(() {
+                            _showTour = value!; // Update the local state
+                          });
+                          _savePreference(value!); // Save the preference
+                        },
+                      ),
+                      Text("Don't show again"),
+                    ],
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text("Cancel"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushReplacementNamed(context, '/login');
+                  },
+                  child: Text("Continue"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Expanded(
         child: PageView(
+      onPageChanged: _onPageChanged,
       physics: const BouncingScrollPhysics(
         decelerationRate: ScrollDecelerationRate.fast,
       ),

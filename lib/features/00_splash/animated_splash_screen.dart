@@ -1,8 +1,13 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
-import 'package:mir_companion_app/lab_widgets/two_word_container.dart';
+
+import '../../lab_features/lab_widgets/two_word_container.dart';
 
 class AnimatedSplashScreen extends StatefulWidget {
-  const AnimatedSplashScreen({super.key});
+  final bool goHome;
+
+  const AnimatedSplashScreen({required this.goHome, super.key});
 
   @override
   AnimatedSplashScreenState createState() => AnimatedSplashScreenState();
@@ -17,11 +22,15 @@ class AnimatedSplashScreenState extends State<AnimatedSplashScreen> with SingleT
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
-    )..forward().whenComplete(() => navigateToHome());
+    )..forward().whenComplete(() => widget.goHome ? navigateToLogin() : navigateToTour());
   }
 
-  void navigateToHome() {
+  void navigateToTour() {
     Navigator.pushReplacementNamed(context, '/welcome');
+  }
+
+  void navigateToLogin() {
+    Navigator.pushReplacementNamed(context, '/login');
   }
 
   @override
@@ -37,14 +46,6 @@ class AnimatedSplashScreenState extends State<AnimatedSplashScreen> with SingleT
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               TwoWordContainer(title: 'companion', subtitle: 'MIR'),
-              // Text(
-              //   'MIR',
-              //   style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold, fontSize: 21),
-              // ),
-              // Text(
-              //   'companion',
-              //   style: TextStyle(color: Colors.purple, fontWeight: FontWeight.bold, fontSize: 45),
-              // ),
               Image.asset('assets/logo.png'),
             ],
           )),
