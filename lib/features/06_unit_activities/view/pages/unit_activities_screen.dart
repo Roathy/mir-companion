@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,7 +19,8 @@ final studentUnitsActivities = FutureProvider.autoDispose
       debugPrint("No auth token found");
       return null;
     }
-
+    print(queryParam);
+    inspect(queryParam);
     String fullUrl =
         "${ApiEndpoints.baseURL}${ApiEndpoints.studentsEgp}/$queryParam";
 
@@ -46,8 +49,7 @@ class UnitActivitiesScreen extends ConsumerWidget {
         data: (data) {
           if (data == null) {
             return const Scaffold(
-              backgroundColor: Colors.grey,
-              body: SafeArea(child: Center(child: Text('No units founded'))),
+              body: SafeArea(child: Center(child: Text('No units found'))),
             );
           } else {
             final primaryColor = hexToColor(data['color_primario']);
@@ -139,7 +141,7 @@ class ActivityCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
         onTap: () {
-          Navigator.push(
+          Navigator.pushReplacement(
               context,
               MaterialPageRoute(
                   builder: (context) =>
@@ -184,7 +186,7 @@ class ExpandedAppbar extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Text('UNIT ${data['id_unidad']}:'.toUpperCase(),
+          Text('UNIT ${data['int_unidad']}:'.toUpperCase(),
               style: const TextStyle(color: Colors.white, fontSize: 18)),
           Text(data['unidad'].toString().toUpperCase(),
               style: const TextStyle(

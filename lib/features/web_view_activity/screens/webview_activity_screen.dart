@@ -10,6 +10,20 @@ import 'package:webview_flutter/webview_flutter.dart';
 import '../../../network/api_endpoints.dart';
 import '../../02_auth/presentation/auth_screen.dart';
 
+String extractMiddleSegments(String input) {
+  // Split the string by '/'
+  final segments = input.split('/');
+
+  // Ensure there are at least 3 segments (e.g., "egp/a11/u1/any_integer")
+  if (segments.length >= 3) {
+    // Return the second and third segments joined by '/'
+    return '${segments[1]}/${segments[2]}';
+  }
+
+  // If there are fewer than 3 segments, return the original string
+  return input;
+}
+
 final unitActivityProvider = FutureProvider.autoDispose
     .family<Map<String, dynamic>?, String>((ref, queryParam) async {
   try {
@@ -51,10 +65,11 @@ class WebViewActivity extends ConsumerWidget {
     // Define the action handlers map
     final Map<String, void Function()> actionHandlers = {
       'finishButtonClick': () {
+        inspect(extractMiddleSegments(queryParam));
         Navigator.pushReplacement(context,
             MaterialPageRoute(builder: (context) {
-          inspect(queryParam);
-          return UnitActivitiesScreen(queryParam: queryParam);
+          return UnitActivitiesScreen(
+              queryParam: extractMiddleSegments(queryParam));
         }));
       }
     };
@@ -93,7 +108,6 @@ class WebViewActivity extends ConsumerWidget {
                 child: asyncActivity.when(
           data: (data) {
             if (data == null) {
-              inspect(data);
               return const Center(child: Text('No activity found'));
             } else {
               final url = '${data['actividad']?['_links']?['self']?['href']}';
