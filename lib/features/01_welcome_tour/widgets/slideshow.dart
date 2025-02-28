@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -60,7 +58,6 @@ class _SlideShowState extends ConsumerState<_SlideShow> {
     }
   }
 
-  // Save preference
   Future<void> _savePreference(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('dontShowTour', value);

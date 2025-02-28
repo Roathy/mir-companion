@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
 
-class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+class TodayAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String userName;
+  final int mircoins;
 
-  const CustomAppBar({super.key, required this.userName});
+  const TodayAppBar(
+      {super.key, required this.userName, required this.mircoins});
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      titleSpacing: 8.0, // Adds a bit of padding to the title section
+      automaticallyImplyLeading: false,
+      titleSpacing: 8.0,
       backgroundColor: Colors.white,
       elevation: 2,
       iconTheme: const IconThemeData(color: Colors.black),
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Left-aligned icon
           Hero(
             tag: 'mironline-logo',
             child: Image.network(
@@ -25,22 +27,18 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               fit: BoxFit.contain,
             ),
           ),
-
-          // Right-aligned elements
           Row(
             children: [
               IconButton(
-                icon: const Icon(Icons.groups, color: Colors.black), // Icon representing a group of people
-                onPressed: () {
-                  // Add functionality
-                },
+                icon: const Icon(Icons.groups, color: Colors.black),
+                onPressed: () {},
               ),
               Row(
                 children: [
-                  const Icon(Icons.star, color: Colors.amber), // Filled yellow star
-                  const SizedBox(width: 4), // Spacing between icon and number
+                  const Icon(Icons.star, color: Colors.amber),
+                  const SizedBox(width: 4),
                   Text(
-                    "120", // Example score value
+                    "$mircoins",
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -49,17 +47,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                 ],
               ),
-              const SizedBox(width: 4), // Spacing between score and profile
-              // User Profile Menu
+              const SizedBox(width: 4),
               PopupMenuButton<int>(
                 onSelected: (value) {
                   if (value == 1) {
-                    // Navigate to profile
                   } else if (value == 2) {
-                    // Help & Support
-                  } else if (value == 3) {
-                    // Logout
-                  }
+                  } else if (value == 3) {}
                 },
                 itemBuilder: (context) => [
                   _buildMenuItem(1, "Your Profile"),

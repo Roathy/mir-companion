@@ -5,13 +5,14 @@ class VideoBackgroundScreen extends StatefulWidget {
   const VideoBackgroundScreen({super.key});
 
   @override
-  _VideoBackgroundScreenState createState() => _VideoBackgroundScreenState();
+  VideoBackgroundScreenState createState() => VideoBackgroundScreenState();
 }
 
-class _VideoBackgroundScreenState extends State<VideoBackgroundScreen> {
+class VideoBackgroundScreenState extends State<VideoBackgroundScreen> {
   late VideoPlayerController _controller;
 
-  Uri videoUri = Uri.parse('https://cdn.pixabay.com/video/2023/01/25/147898-792811387_large.mp4');
+  Uri videoUri = Uri.parse(
+      'https://cdn.pixabay.com/video/2023/01/25/147898-792811387_large.mp4');
 
   @override
   void initState() {
