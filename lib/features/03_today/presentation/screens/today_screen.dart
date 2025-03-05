@@ -1,23 +1,14 @@
-import 'dart:convert';
-import 'dart:developer';
-
-import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:mir_companion_app/features/web_view_activity/presentation/screens/webview_activity_screen.dart';
 
-import '../../network/api_endpoints.dart';
-import '../02_auth/presentation/auth_screen.dart';
-import 'widgets/bg_image_container.dart';
-import 'widgets/today_app_bar.dart';
-
-String createMD5Hash() {
-  DateTime now = DateTime.now();
-  String formattedDate =
-      '${now.year}${now.month.toString().padLeft(2, '0')}${now.day}';
-  return md5.convert(utf8.encode('752486-$formattedDate')).toString();
-}
+import '../../../../core/utils/utils.dart';
+import '../../../../network/api_endpoints.dart';
+import '../../../02_auth/presentation/screens/auth_screen.dart';
+import '../widgets/bg_image_container.dart';
+import '../widgets/today_app_bar.dart';
 
 final studentTodayProvider =
     FutureProvider.autoDispose<Map<String, dynamic>?>((ref) async {
@@ -76,22 +67,26 @@ class StudentTodayScreen extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             GestureDetector(
-                              onTap: () {
-                                Navigator.pushNamed(context, '/egp-levels');
-                              },
-                              child: BgImageContainer(
-                                heightMultiplier: 0.18,
-                                imageUrl:
-                                    "https://mironline.io/assets/img/today/bg_thumbnail.jpg",
-                                content: EGPTitle(),
-                              ),
-                            ),
+                                onTap: () {
+                                  Navigator.pushNamed(context, '/egp-levels');
+                                },
+                                child: BgImageContainer(
+                                  heightMultiplier: 0.18,
+                                  imageUrl:
+                                      "https://mironline.io/assets/img/today/bg_thumbnail.jpg",
+                                  content: EGPTitle(),
+                                )),
                             DateDetails(),
                             GestureDetector(
                                 onTap: () {
-                                  final lastActivityUrl =
-                                      egp['_links']['self']['href'];
-                                  inspect(lastActivityUrl);
+                                  final String activityQuery =
+                                      '/${egp['nivel_tag']}/u${egp['int_unidad']}/${egp['int_actividad']}';
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => WebViewActivity(
+                                            activityQuery: activityQuery),
+                                      ));
                                 },
                                 child: BgImageContainer(
                                   imageUrl: activityBgImgUrl,

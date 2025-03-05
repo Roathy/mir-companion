@@ -3,11 +3,12 @@ import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mir_companion_app/features/06_unit_activities/view/widgets/export_unit_activities_widgets.dart';
+import 'package:mir_companion_app/features/06_unit_activities/presentation/widgets/export_unit_activities_widgets.dart';
 
+import '../../../../core/utils/utils.dart';
 import '../../../../network/api_endpoints.dart';
-import '../../../02_auth/presentation/auth_screen.dart';
-import '../../../web_view_activity/screens/webview_activity_screen.dart';
+import '../../../02_auth/presentation/screens/auth_screen.dart';
+import '../../../web_view_activity/presentation/screens/webview_activity_screen.dart';
 
 final studentUnitsActivities = FutureProvider.autoDispose
     .family<Map<String, dynamic>?, String>((ref, queryParam) async {
@@ -19,8 +20,6 @@ final studentUnitsActivities = FutureProvider.autoDispose
       debugPrint("No auth token found");
       return null;
     }
-    print(queryParam);
-    inspect(queryParam);
     String fullUrl =
         "${ApiEndpoints.baseURL}${ApiEndpoints.studentsEgp}/$queryParam";
 
@@ -46,15 +45,19 @@ class UnitActivitiesScreen extends ConsumerWidget {
     final asyncActivities = ref.watch(studentUnitsActivities(queryParam));
 
     return asyncActivities.when(
-        data: (data) {
-          if (data == null) {
+        data: (activitiesData) {
+          if (activitiesData == null) {
             return const Scaffold(
               body: SafeArea(child: Center(child: Text('No units found'))),
             );
           } else {
-            final primaryColor = hexToColor(data['color_primario']);
-            final secondaryColor = hexToColor(data['color_secundario']);
-            final List activities = data['actividades'];
+            final primaryColor = hexToColor(activitiesData['color_primario']);
+            final secondaryColor =
+                hexToColor(activitiesData['color_secundario']);
+            final String currentLevel = '/${activitiesData['nivel_tag']}';
+            final String currentUnit = '/u${activitiesData['int_unidad']}';
+            final List activities = activitiesData['actividades'];
+            inspect(activitiesData);
             return Scaffold(
                 backgroundColor: Colors.grey[200],
                 body: SafeArea(
@@ -82,9 +85,11 @@ class UnitActivitiesScreen extends ConsumerWidget {
                                   top: 48.0),
                           title: isCollapsed
                               ? CollapsedAppbar(
-                                  data: data, secondaryColor: secondaryColor)
+                                  data: activitiesData,
+                                  secondaryColor: secondaryColor)
                               : ExpandedAppbar(
-                                  data: data, secondaryColor: secondaryColor),
+                                  data: activitiesData,
+                                  secondaryColor: secondaryColor),
                           background: Container(color: primaryColor),
                         );
                       })),
@@ -92,8 +97,9 @@ class UnitActivitiesScreen extends ConsumerWidget {
                       delegate: SliverChildBuilderDelegate(
                     (context, index) {
                       final currentActivity = activities[index];
-                      final String queryParam = extractPathFromEgp(
-                          currentActivity['_links']['self']['href']);
+
+                      final String activityQuery =
+                          '$currentLevel$currentUnit/${currentActivity['int_actividad']}';
                       final int currentScore = (currentActivity['estadisticas']
                               ?['estrellas'] as int?) ??
                           0;
@@ -103,7 +109,7 @@ class UnitActivitiesScreen extends ConsumerWidget {
                           child: Column(children: [
                             ActivityCard(
                               currentActivity: currentActivity,
-                              activityUrl: queryParam,
+                              activityUrl: activityQuery,
                             ),
                             Padding(
                                 padding: const EdgeInsets.only(
@@ -141,11 +147,11 @@ class ActivityCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
         onTap: () {
-          Navigator.pushReplacement(
+          Navigator.push(
               context,
               MaterialPageRoute(
                   builder: (context) =>
-                      WebViewActivity(queryParam: activityUrl)));
+                      WebViewActivity(activityQuery: activityUrl)));
         },
         child: Stack(children: [
           // Shadow effect container
@@ -317,17 +323,6 @@ class ActivityDetails extends StatelessWidget {
               TextActivityTitle(currentActivity: currentActivity),
               TextActivityType(currentActivity: currentActivity),
             ]));
-  }
-}
-
-String extractPathFromEgp(String url) {
-  const String keyword = "egp";
-  int index = url.indexOf(keyword);
-
-  if (index != -1) {
-    return url.substring(index); // Keep everything from "egp" onwards
-  } else {
-    throw Exception("Keyword '$keyword' not found in URL");
   }
 }
 

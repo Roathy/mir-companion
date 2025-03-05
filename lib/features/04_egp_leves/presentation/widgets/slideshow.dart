@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../core/scroll_physics.dart';
+import '../../core/scroll_physics.dart';
 
 final currentIndexPage = StateProvider<int>((ref) => 0);
 

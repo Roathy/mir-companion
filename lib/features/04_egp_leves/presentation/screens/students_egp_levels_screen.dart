@@ -1,21 +1,13 @@
-import 'dart:convert';
-
-import 'package:crypto/crypto.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../05_0_egp_units/levels_s_units_screen.dart';
 
-import '../../network/api_endpoints.dart';
-import '../02_auth/presentation/auth_screen.dart';
-import 'widgets/code_activation_screen.dart';
-
-String createMD5Hash() {
-  DateTime now = DateTime.now();
-  String formattedDate =
-      '${now.year}${now.month.toString().padLeft(2, '0')}${now.day}';
-  return md5.convert(utf8.encode('752486-$formattedDate')).toString();
-}
+import '../../../../core/utils/utils.dart';
+import '../../../05_egp_units/presentation/screens/levels_s_units_screen.dart';
+import '../../../../network/api_endpoints.dart';
+import '../../../02_auth/presentation/screens/auth_screen.dart';
+import '../widgets/code_activation_screen.dart';
 
 final studentEGPProvider =
     FutureProvider.autoDispose<Map<String, dynamic>?>((ref) async {
@@ -30,23 +22,22 @@ final studentEGPProvider =
 
     String fullUrl = "${ApiEndpoints.baseURL}${ApiEndpoints.studentsEgp}";
 
-    Response response = await dio.get(
-      fullUrl,
-      options: Options(
-        headers: {
+    Response response = await dio.get(fullUrl,
+        options: Options(headers: {
           "X-Requested-With": "XMLHttpRequest",
           "X-App-MirHorizon": createMD5Hash(),
           "Authorization": "Bearer $authToken",
-        },
-      ),
-    );
+        }));
     return response.data['data'];
   } catch (e) {
     debugPrint("Error fetching student EGP levels: $e");
     return null;
   }
 });
-final nivelTagProvider = StateProvider<String>((ref) => '');
+// Add a provider to track the current page index
+final currentPageProvider = StateProvider.autoDispose<int>((ref) => 0);
+// Add a provider to track the level tag provider
+final levelTagProvider = StateProvider<String>((ref) => '');
 
 class StudentsEgpLevelsScreen extends ConsumerStatefulWidget {
   const StudentsEgpLevelsScreen({super.key});
@@ -145,32 +136,29 @@ void _handleLevelTap(BuildContext context, bool isLevelActive,
     Map<String, dynamic> currentLevel) {
   if (isLevelActive) {
     Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => LevelsSUnitsScreen(
-          queryParam: currentLevel['nivel_tag'],
-        ),
-      ),
-    );
+        context,
+        MaterialPageRoute(
+            builder: (context) => LevelsSUnitsScreen(
+                  queryParam: currentLevel['nivel_tag'],
+                )));
   } else {
     Navigator.push(
-      context,
-      PageRouteBuilder(
-        opaque: false,
-        barrierColor: Colors.transparent,
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            CodeActivationScreen(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0.0, 1.0),
-              end: Offset.zero,
-            ).animate(animation),
-            child: child,
-          );
-        },
-      ),
-    );
+        context,
+        PageRouteBuilder(
+            opaque: false,
+            barrierColor: Colors.transparent,
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                CodeActivationScreen(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0.0, 1.0),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              );
+            }));
   }
 }
 
@@ -285,6 +273,3 @@ class NavStateIndicator extends StatelessWidget {
     );
   }
 }
-
-// Add a provider to track the current page index
-final currentPageProvider = StateProvider.autoDispose<int>((ref) => 0);
