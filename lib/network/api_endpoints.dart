@@ -3,4 +3,5 @@ abstract class ApiEndpoints {
   static const String studentsLogin = '/login';
   static const String studentsProfile = '/today';
   static const String studentsEgp = '/egp';
+  static const String studentsExtraAttempt = '/extra-attempt';
 }

@@ -57,7 +57,6 @@ class UnitActivitiesScreen extends ConsumerWidget {
             final String currentLevel = '/${activitiesData['nivel_tag']}';
             final String currentUnit = '/u${activitiesData['int_unidad']}';
             final List activities = activitiesData['actividades'];
-            inspect(activitiesData);
             return Scaffold(
                 backgroundColor: Colors.grey[200],
                 body: SafeArea(

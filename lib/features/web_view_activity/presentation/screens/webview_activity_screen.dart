@@ -11,6 +11,8 @@ import '../../../../core/utils/utils.dart';
 import '../../../../network/api_endpoints.dart';
 import '../../../02_auth/presentation/screens/auth_screen.dart';
 
+// final activityQueryProvider = StateProvider<String>((ref) => '');
+
 final unitActivityProvider = FutureProvider.autoDispose
     .family<Map<String, dynamic>?, String>((ref, activityQuery) async {
   Response<dynamic>? response;
@@ -35,21 +37,13 @@ final unitActivityProvider = FutureProvider.autoDispose
           "X-App-MirHorizon": createMD5Hash(),
           "Authorization": "Bearer $authToken",
         }));
-
-    // if (response.data == null) {
-    //   debugPrint("Invalid response structure");
-    //   return {"error": {"code": 500, "message": "Server returned no data"}};
-    // }
-
     return response.data;
   } catch (e) {
     debugPrint('Error fetching Unit\'s activity: $e');
-
     // If response exists, return its error data
     if (response != null && response.data != null) {
       return response.data;
     }
-
     // Otherwise, return a generic error message
     return {
       "error": {"code": 500, "message": "Unexpected error occurred"}
@@ -68,6 +62,8 @@ class WebViewActivity extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncActivity = ref.watch(unitActivityProvider(activityQuery));
+    // Set the provider's value when this widget builds
+    // ref.read(activityQueryProvider.notifier).state = activityQuery;
 
     // Define the action handlers map
     final Map<String, void Function()> actionHandlers = {
@@ -120,14 +116,11 @@ class WebViewActivity extends ConsumerWidget {
             }
             // Check if an error is present
             if (activityData.containsKey("error")) {
-              // final errorCode = activityData["error"]["code"];
-              // final errorMessage = activityData["error"]["message"];
-
-              return NoActivityAttempts(canBuy: false);
+              return NoActivityAttemptsNotice(canBuy: false);
             }
             if (activityData['message'] == specialCases['out-of-tries']) {
               return Center(
-                  child: NoActivityAttempts(
+                  child: NoActivityAttemptsNotice(
                 canBuy: true,
               ));
             } else {
@@ -198,9 +191,9 @@ class WebViewActivity extends ConsumerWidget {
   }
 }
 
-class NoActivityAttempts extends StatelessWidget {
+class NoActivityAttemptsNotice extends StatelessWidget {
   final bool canBuy;
-  const NoActivityAttempts({
+  const NoActivityAttemptsNotice({
     super.key,
     required this.canBuy,
   });
@@ -208,83 +201,98 @@ class NoActivityAttempts extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 30),
-      decoration: BoxDecoration(color: Colors.blue),
-      child: Column(
-          spacing: 12,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Whoa There! Important Notice',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w600),
-            ),
-            Text(
-              'You have reached the maximum number of attempts for the exercise. 😢',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500),
-            ),
-            Text(
-              'Please return to the main menu and continue with the enxt activity.',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 60.0),
-              child: FilledButton(
-                  style: ButtonStyle(
-                      alignment: Alignment.center,
-                      backgroundColor: WidgetStateProperty.all(Colors.orange)),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.navigate_before,
-                          color: Colors.white,
-                          size: 30,
-                        ),
-                        Text(
-                          'Exit to the menu',
-                          style: TextStyle(
-                              fontWeight: FontWeight.w700, fontSize: 18),
-                        ),
-                      ])),
-            ),
-            canBuy
-                ? Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 60.0),
-                    child: FilledButton(
-                        style: ButtonStyle(
-                            alignment: Alignment.center,
-                            backgroundColor:
-                                WidgetStateProperty.all(Colors.green)),
-                        onPressed: () {},
-                        child: Row(
-                            spacing: 6,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.star,
-                                color: Colors.white,
+        padding: EdgeInsets.symmetric(horizontal: 30),
+        decoration: BoxDecoration(color: Colors.blue),
+        child: Column(
+            spacing: 12,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Whoa There! Important Notice',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w600),
+              ),
+              Text(
+                'You have reached the maximum number of attempts for the exercise. 😢',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500),
+              ),
+              Text(
+                'Please return to the main menu and continue with the next activity.',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500),
+              ),
+              Column(children: [
+                SizedBox(
+                    width: double
+                        .infinity, // Makes both buttons expand to equal width
+                    child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0), // Adjust padding as needed
+                        child: FilledButton(
+                            style: ButtonStyle(
+                              alignment: Alignment.center,
+                              backgroundColor:
+                                  WidgetStateProperty.all(Colors.orange),
+                            ),
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.center, // Centers content
+                                children: [
+                                  Icon(
+                                    Icons.navigate_before,
+                                    color: Colors.white,
+                                    size: 30,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'Exit to the menu',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 18),
+                                  )
+                                ])))),
+                if (canBuy) // Conditionally show second button
+                  SizedBox(
+                      width: double.infinity, // Ensures same width
+                      child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: FilledButton(
+                              style: ButtonStyle(
+                                alignment: Alignment.center,
+                                backgroundColor:
+                                    WidgetStateProperty.all(Colors.green),
                               ),
-                              Text(
-                                'Usar 99 mircoins',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 18),
-                              ),
-                            ])),
-                  )
-                : SizedBox.shrink(),
-          ]),
-    );
+                              onPressed: () {
+                                
+                              },
+                              child: Row(
+                                  mainAxisAlignment: MainAxisAlignment
+                                      .center, // Centers content
+                                  children: [
+                                    Icon(
+                                      Icons.star,
+                                      color: Colors.white,
+                                      size: 30,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Usar 30 mircoins',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 18),
+                                    )
+                                  ]))))
+              ])
+            ]));
   }
 }
