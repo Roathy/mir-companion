@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mir_companion_app/features/06_unit_activities/presentation/screens/unit_activities_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'features/00_splash/animated_splash_screen.dart';
@@ -62,6 +63,7 @@ class _MyAppState extends State<MyApp> {
           '/login': (context) => LoginPage(),
           '/home': (context) => StudentTodayScreen(),
           '/egp-levels': (context) => StudentsEgpLevelsScreen(),
+          '/unit-activities': (context) => UnitActivitiesScreen(),
         });
   }
 }

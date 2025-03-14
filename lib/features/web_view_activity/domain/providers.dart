@@ -1,0 +1,68 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../02_auth/presentation/screens/auth_screen.dart';
+import '../data/activity_repository.dart';
+
+final activityRepositoryProvider = Provider<ActivityRepository>((ref) {
+  final dio = ref.read(dioProvider);
+  final authToken = ref.read(authTokenProvider);
+  return ActivityRepository(dio: dio, authToken: authToken);
+});
+
+final unitActivityProvider = FutureProvider.autoDispose
+    .family<Map<String, dynamic>?, String>((ref, activityQuery) async {
+  final repository = ref.read(activityRepositoryProvider);
+  final data = await repository.fetchUnitActivity(activityQuery);
+
+  if (data.containsKey('error')) {
+    throw Exception(
+        data['error']); // Ensure the error message is shown properly
+  }
+
+  return data;
+});
+
+enum BuyAttemptState { initial, loading, success, error }
+
+class BuyAttemptNotifier extends AutoDisposeAsyncNotifier<BuyAttemptState> {
+  String? errorMessage;
+
+  @override
+  FutureOr<BuyAttemptState> build() {
+    return BuyAttemptState.initial;
+  }
+
+  Future<void> buyAttempt(int activityId) async {
+    state = const AsyncValue.loading();
+    errorMessage = null;
+
+    try {
+      debugPrint("Starting buy attempt process for activity ID: $activityId");
+      final repository = ref.read(activityRepositoryProvider);
+      final result = await repository.buyExtraAttempt(activityId);
+
+      if (result.containsKey('error')) {
+        errorMessage = result['error'];
+        debugPrint("Buy attempt failed: $errorMessage");
+        state = AsyncValue.error(Exception(errorMessage), StackTrace.current);
+      } else {
+        state = const AsyncValue.data(BuyAttemptState.success);
+        debugPrint("Buy attempt process completed successfully");
+
+        // Invalidate the unitActivityProvider to reload the activity
+        ref.invalidate(unitActivityProvider);
+      }
+    } catch (e) {
+      debugPrint("Unexpected buy attempt error: $e");
+      errorMessage = "An unexpected error occurred. Please try again.";
+      state = AsyncValue.error(Exception(errorMessage), StackTrace.current);
+    }
+  }
+}
+
+final buyAttemptNotifierProvider =
+    AutoDisposeAsyncNotifierProvider<BuyAttemptNotifier, BuyAttemptState>(
+        () => BuyAttemptNotifier());

@@ -35,6 +35,8 @@ final studentLevelUnits = FutureProvider.autoDispose
   }
 });
 
+final unitParamProvider = StateProvider<String?>((ref) => null);
+
 class LevelsSUnitsScreen extends ConsumerWidget {
   final String queryParam;
   const LevelsSUnitsScreen({required this.queryParam, super.key});
@@ -56,69 +58,76 @@ class LevelsSUnitsScreen extends ConsumerWidget {
             return Scaffold(
                 appBar: UnitsAppBar(title: title, mircoins: mircoins),
                 body: SafeArea(
-                    child: Center(
-                        child: SingleChildScrollView(
-                            child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 21.0, vertical: 45),
-                                child: Column(
-                                    spacing: 18,
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: List.generate(
-                                        units
-                                            .length, // Prevent out-of-range errors
-                                        (index) => GestureDetector(
-                                              behavior: HitTestBehavior.opaque,
-                                              onTap: () {
-                                                final String queryParam =
-                                                    '${unitsData['nivel_tag']}/u${units[index]['int_unidad']}';
-                                                Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            UnitActivitiesScreen(
-                                                                queryParam:
-                                                                    queryParam)));
-                                              },
-                                              child: Material(
-                                                  elevation:
-                                                      1, // Material elevation for lift effect
-                                                  borderRadius:
-                                                      BorderRadius.circular(16),
-                                                  shadowColor: Colors.black
-                                                      .withOpacity(0.3),
-                                                  child: Container(
-                                                    // margin: EdgeInsets.only(bottom: 18),
-                                                    decoration: BoxDecoration(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(16),
-                                                        boxShadow: [
-                                                          BoxShadow(
-                                                            color: Color.fromRGBO(
-                                                                0,
-                                                                0,
-                                                                0,
-                                                                0.2), // 0.3 represents 30% opacity
-                                                            blurRadius: 3,
-                                                            spreadRadius: 3,
-                                                            offset:
-                                                                Offset(0, 0),
-                                                          )
-                                                        ]),
-                                                    clipBehavior: Clip.hardEdge,
-                                                    child: UnitHeader(
-                                                        currentUnit:
-                                                            units[index]),
-                                                  )),
-                                              // child: Padding(
-                                              //   padding: const EdgeInsets.only(bottom: 18),
-                                              //   child: UnitHeader(currentUnit: units[index]),
-                                              // ),
-                                            ))))))));
+                    child: SingleChildScrollView(
+                        child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 21.0, vertical: 45),
+                            child: Column(
+                                spacing: 30,
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: List.generate(units.length, (index) {
+                                  final bool isUnitActive =
+                                      units[index]['desbloqueada'];
+                                  return Stack(
+                                    children: [
+                                      GestureDetector(
+                                          behavior: HitTestBehavior.opaque,
+                                          onTap: () {
+                                            final String queryParam =
+                                                '${unitsData['nivel_tag']}/u${units[index]['int_unidad']}';
+                                            ref
+                                                .read(
+                                                    unitParamProvider.notifier)
+                                                .state = queryParam;
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        UnitActivitiesScreen()));
+                                          },
+                                          child: Material(
+                                              elevation: 1,
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
+                                              shadowColor:
+                                                  Colors.black.withOpacity(0.3),
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            16),
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                          color: Color.fromRGBO(
+                                                              0,
+                                                              0,
+                                                              0,
+                                                              0.2), // 0.3 represents 30% opacity
+                                                          blurRadius: 3,
+                                                          spreadRadius: 3,
+                                                          offset: Offset(0, 0))
+                                                    ]),
+                                                clipBehavior: Clip.hardEdge,
+                                                child: UnitHeader(
+                                                    currentUnit: units[index]),
+                                              ))),
+                                      isUnitActive
+                                          ? const SizedBox()
+                                          : Positioned.fill(
+                                              child: Container(
+                                                  decoration: BoxDecoration(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              16),
+                                                      color: Colors.black
+                                                          .withOpacity(0.7)),
+                                                  child: const Icon(Icons.lock,
+                                                      size: 90,
+                                                      color: Colors.white)))
+                                    ],
+                                  );
+                                }))))));
           }
         },
         loading: () => const Scaffold(

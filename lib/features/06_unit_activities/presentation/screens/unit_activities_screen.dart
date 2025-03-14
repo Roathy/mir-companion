@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,7 +6,8 @@ import 'package:mir_companion_app/features/06_unit_activities/presentation/widge
 import '../../../../core/utils/utils.dart';
 import '../../../../network/api_endpoints.dart';
 import '../../../02_auth/presentation/screens/auth_screen.dart';
-import '../../../web_view_activity/presentation/screens/webview_activity_screen.dart';
+import '../../../05_egp_units/presentation/screens/levels_s_units_screen.dart';
+import '../../../web_view_activity/presentation/screens/webview_activity_screen_refactor.dart';
 
 final studentUnitsActivities = FutureProvider.autoDispose
     .family<Map<String, dynamic>?, String>((ref, queryParam) async {
@@ -37,11 +36,15 @@ final studentUnitsActivities = FutureProvider.autoDispose
 });
 
 class UnitActivitiesScreen extends ConsumerWidget {
-  final String queryParam;
-  const UnitActivitiesScreen({super.key, required this.queryParam});
+  const UnitActivitiesScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final queryParam =
+        ref.watch(unitParamProvider); // Access queryParam from the provider
+    if (queryParam == null) {
+      return const Center(child: Text('No queryParam found!'));
+    }
     final asyncActivities = ref.watch(studentUnitsActivities(queryParam));
 
     return asyncActivities.when(
@@ -96,6 +99,8 @@ class UnitActivitiesScreen extends ConsumerWidget {
                       delegate: SliverChildBuilderDelegate(
                     (context, index) {
                       final currentActivity = activities[index];
+                      final bool isActivityUnlocked =
+                          currentActivity['desbloqueada'];
 
                       final String activityQuery =
                           '$currentLevel$currentUnit/${currentActivity['int_actividad']}';
@@ -106,10 +111,23 @@ class UnitActivitiesScreen extends ConsumerWidget {
                           padding: const EdgeInsets.symmetric(
                               vertical: 12, horizontal: 18),
                           child: Column(children: [
-                            ActivityCard(
-                              currentActivity: currentActivity,
-                              activityUrl: activityQuery,
-                            ),
+                            Stack(children: [
+                              ActivityCard(
+                                currentActivity: currentActivity,
+                                activityUrl: activityQuery,
+                              ),
+                              isActivityUnlocked
+                                  ? const SizedBox()
+                                  : Positioned.fill(
+                                      child: Container(
+                                          decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
+                                              color: Colors.black
+                                                  .withOpacity(0.7)),
+                                          child: const Icon(Icons.lock,
+                                              size: 90, color: Colors.white)))
+                            ]),
                             Padding(
                                 padding: const EdgeInsets.only(
                                     top: 27.0, bottom: 0.0),
