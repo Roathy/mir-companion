@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -23,12 +24,14 @@ final studentTodayProvider =
 
     String fullUrl = "${ApiEndpoints.baseURL}${ApiEndpoints.studentsProfile}";
 
-    Response response = await dio.get(fullUrl,
-        options: Options(headers: {
-          "X-Requested-With": "XMLHttpRequest",
-          "X-App-MirHorizon": createMD5Hash(),
-          "Authorization": "Bearer $authToken",
-        }));
+    Response response = await dio.get(
+      fullUrl,
+      options: Options(headers: {
+        "X-Requested-With": "XMLHttpRequest",
+        "X-App-MirHorizon": createMD5Hash(),
+        "Authorization": "Bearer $authToken",
+      }),
+    );
     return response.data['data'];
   } catch (e) {
     debugPrint("Error fetching student today: $e");
@@ -36,81 +39,134 @@ final studentTodayProvider =
   }
 });
 
-class StudentTodayScreen extends ConsumerWidget {
+class StudentTodayScreen extends ConsumerStatefulWidget {
   const StudentTodayScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<StudentTodayScreen> createState() => _StudentTodayScreenState();
+}
+
+class _StudentTodayScreenState extends ConsumerState<StudentTodayScreen> {
+  @override
+  Widget build(BuildContext context) {
     final profileAsync = ref.watch(studentTodayProvider);
 
     return profileAsync.when(
-      data: (profileData) {
-        if (profileData == null) {
-          return const Scaffold(
-              body: SafeArea(
-                  child: Center(child: Text("No profile data found"))));
-        } else {
-          final alumno = profileData['alumno'];
-          final egp = profileData['actividades_siguientes']['egp'];
-          final String activityBgImgUrl = egp['cover_actividad'];
-          return Scaffold(
-              appBar: TodayAppBar(
-                  mircoins: alumno['mircoins'] ?? 0,
-                  userName: '${alumno['fullname']}'),
-              body: SafeArea(
-                  child: SingleChildScrollView(
-                      primary: true,
-                      physics: BouncingScrollPhysics(),
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                          spacing: 30,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            GestureDetector(
-                                onTap: () {
-                                  Navigator.pushNamed(context, '/egp-levels');
-                                },
-                                child: BgImageContainer(
-                                  heightMultiplier: 0.18,
-                                  imageUrl:
-                                      "https://mironline.io/assets/img/today/bg_thumbnail.jpg",
-                                  content: EGPTitle(),
-                                )),
-                            DateDetails(),
-                            GestureDetector(
-                                onTap: () {
-                                  final String activityQuery =
-                                      '/${egp['nivel_tag']}/u${egp['int_unidad']}/${egp['int_actividad']}';
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => WebViewActivity(
-                                            activityQuery: activityQuery),
-                                      ));
-                                },
-                                child: BgImageContainer(
-                                  imageUrl: activityBgImgUrl,
-                                  content: LastActivityDetails(egp: egp),
-                                ))
-                          ]))));
-        }
-      },
-      loading: () => Scaffold(
-        body: SafeArea(child: Center(child: CircularProgressIndicator())),
-      ),
-      error: (error, stackTrace) => Scaffold(
-        body: SafeArea(child: Center(child: Text(error.toString()))),
-      ),
-    );
+        data: (profileData) {
+          if (profileData == null) {
+            return const Scaffold(
+              body:
+                  SafeArea(child: Center(child: Text("No profile data found"))),
+            );
+          } else {
+            final alumno = profileData['alumno'];
+            final egp = profileData['actividades_siguientes']['egp'];
+            final String activityBgImgUrl = egp['cover_actividad'];
+
+            return PopScope(
+              canPop: false,
+              onPopInvokedWithResult: (didPop, result) async {
+                final result = await showAdaptiveDialog(
+                    barrierDismissible: false,
+                    context: context,
+                    builder: (context) {
+                      return Dialog(
+                          child:
+                              Column(mainAxisSize: MainAxisSize.min, children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 30.0),
+                          child: Text(
+                            'Exit application?',
+                            style: TextStyle(fontSize: 27),
+                          ),
+                        ),
+                        Padding(
+                            padding: const EdgeInsets.only(
+                                right: 30.0, bottom: 21.0),
+                            child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context, false);
+                                      },
+                                      child: Text(
+                                        'NO',
+                                        style: TextStyle(fontSize: 18),
+                                      )),
+                                  TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context, true);
+                                      },
+                                      child: Text(
+                                        'YES',
+                                        style: TextStyle(fontSize: 18),
+                                      )),
+                                ]))
+                      ]));
+                    });
+                if (result == true) {
+                  SystemNavigator.pop(animated: true);
+                }
+              },
+              child: Scaffold(
+                  appBar: TodayAppBar(
+                    mircoins: alumno['mircoins'] ?? 0,
+                    userName: '${alumno['fullname']}',
+                  ),
+                  body: SafeArea(
+                      child: SingleChildScrollView(
+                          primary: true,
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                              spacing: 30,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    Navigator.pushNamed(context, '/egp-levels');
+                                  },
+                                  child: const BgImageContainer(
+                                    heightMultiplier: 0.18,
+                                    imageUrl:
+                                        "https://mironline.io/assets/img/today/bg_thumbnail.jpg",
+                                    content: EGPTitle(),
+                                  ),
+                                ),
+                                const DateDetails(),
+                                GestureDetector(
+                                    onTap: () {
+                                      final String activityQuery =
+                                          '/${egp['nivel_tag']}/u${egp['int_unidad']}/${egp['int_actividad']}';
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => WebViewActivity(
+                                              activityQuery: activityQuery),
+                                        ),
+                                      ).then((_) {
+                                        ref.invalidate(studentTodayProvider);
+                                      });
+                                    },
+                                    child: BgImageContainer(
+                                      imageUrl: activityBgImgUrl,
+                                      content: LastActivityDetails(egp: egp),
+                                    ))
+                              ])))),
+            );
+          }
+        },
+        loading: () => const Scaffold(
+            body: SafeArea(child: Center(child: CircularProgressIndicator()))),
+        error: (error, stackTrace) => Scaffold(
+            body: SafeArea(child: Center(child: Text(error.toString())))));
   }
 }
 
 class LastActivityDetails extends StatelessWidget {
   final Map<String, dynamic> egp;
-  const LastActivityDetails({
-    super.key,
-    required this.egp,
-  });
+  const LastActivityDetails({super.key, required this.egp});
 
   @override
   Widget build(BuildContext context) {
@@ -120,11 +176,11 @@ class LastActivityDetails extends StatelessWidget {
             child: ListView(primary: false, shrinkWrap: true, children: [
               Text(
                 'Continue with ${egp['titulo']}',
-                style: TextStyle(fontSize: 18, color: Colors.white),
+                style: const TextStyle(fontSize: 18, color: Colors.white),
               ),
               Text(
                 'on ${egp['nivel']} - Unit ${egp['int_unidad']}',
-                style: TextStyle(
+                style: const TextStyle(
                     fontSize: 18,
                     color: Colors.white,
                     fontWeight: FontWeight.bold),
@@ -134,9 +190,7 @@ class LastActivityDetails extends StatelessWidget {
 }
 
 class DateDetails extends StatelessWidget {
-  const DateDetails({
-    super.key,
-  });
+  const DateDetails({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -146,31 +200,24 @@ class DateDetails extends StatelessWidget {
     return Padding(
         padding: const EdgeInsets.only(left: 30.0),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(
-            formattedDate,
-            style: const TextStyle(fontSize: 15, color: Colors.black54),
-          ),
-          const Text(
-            'Today for you:',
-            style: TextStyle(
-                fontSize: 21, color: Colors.black, fontWeight: FontWeight.bold),
-          )
+          Text(formattedDate,
+              style: const TextStyle(fontSize: 15, color: Colors.black54)),
+          const Text('Today for you:',
+              style: TextStyle(
+                  fontSize: 21,
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold))
         ]));
   }
 }
 
 class EGPTitle extends StatelessWidget {
-  const EGPTitle({
-    super.key,
-  });
+  const EGPTitle({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return const Center(
         child: Text('General English levels',
-            style: TextStyle(
-              fontSize: 30,
-              color: Colors.white,
-            )));
+            style: TextStyle(fontSize: 30, color: Colors.white)));
   }
 }

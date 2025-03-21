@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mir_companion_app/features/06_unit_activities/presentation/widgets/export_unit_activities_widgets.dart';
+import 'package:mironline/features/06_unit_activities/presentation/widgets/export_unit_activities_widgets.dart';
 
 import '../../../../core/utils/utils.dart';
 import '../../../../network/api_endpoints.dart';
@@ -40,8 +40,7 @@ class UnitActivitiesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final queryParam =
-        ref.watch(unitParamProvider); // Access queryParam from the provider
+    final queryParam = ref.watch(unitParamProvider);
     if (queryParam == null) {
       return const Center(child: Text('No queryParam found!'));
     }

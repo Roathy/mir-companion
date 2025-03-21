@@ -1,4 +1,4 @@
-name: mir_companion_app
+name: mironline
 description: "Pocket version for make it real and mironline language learning resources!"
 publish_to: 'none' 
 
@@ -40,6 +40,14 @@ dev_dependencies:
   json_serializable: ^6.9.4
   riverpod_generator: ^2.6.4
   riverpod_lint: ^2.6.4
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/logo.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/icon/logo.png"
+  remove_alpha_ios: true
 
 flutter_icons:
   android: true

@@ -231,15 +231,15 @@ class NoActivityAttemptsNotice extends ConsumerWidget {
               fontWeight: FontWeight.w500,
             ),
           ),
-          if (!canBuy && message != null)
-            Text(
-              message!,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
+          // if (!canBuy && message != null)
+          //   Text(
+          //     message!,
+          //     style: TextStyle(
+          //       color: Colors.white,
+          //       fontSize: 18,
+          //       fontWeight: FontWeight.w500,
+          //     ),
+          //   ),
           Text(
             'Please return to the main menu and continue with the next activity.',
             style: TextStyle(

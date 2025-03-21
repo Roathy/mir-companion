@@ -28,6 +28,7 @@ class ActivityRepository {
           options: Options(headers: {
             "X-Requested-With": "XMLHttpRequest",
             "X-App-MirHorizon": createMD5Hash(),
+            // "X-App-MirHorizon-NoCache": 1,
             "Authorization": "Bearer $authToken",
           }));
 

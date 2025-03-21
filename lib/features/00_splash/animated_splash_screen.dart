@@ -1,6 +1,12 @@
-import 'package:flutter/material.dart';
+import 'dart:developer';
 
-class AnimatedSplashScreen extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+import '../02_auth/presentation/screens/auth_screen.dart';
+
+class AnimatedSplashScreen extends ConsumerStatefulWidget {
   final bool goHome;
   const AnimatedSplashScreen({required this.goHome, super.key});
 
@@ -8,19 +14,48 @@ class AnimatedSplashScreen extends StatefulWidget {
   AnimatedSplashScreenState createState() => AnimatedSplashScreenState();
 }
 
-class AnimatedSplashScreenState extends State<AnimatedSplashScreen>
+class AnimatedSplashScreenState extends ConsumerState<AnimatedSplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
+
+    final Future<String?> hasSessionFuture = getLastSession();
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
     )..forward().whenComplete(() {
-        Navigator.pushNamed(context, '/login');
+        hasSessionFuture.then(
+          (token) {
+            inspect(token);
+            if (mounted) {
+              // Guard with mounted
+              if (token != null && token.isNotEmpty) {
+                ref.read(authTokenProvider.notifier).state = token;
+                Navigator.pushReplacementNamed(context, '/home');
+              } else {
+                Navigator.pushReplacementNamed(context, '/login');
+              }
+            }
+          },
+        );
       });
+  }
+
+  Future<String?> getLastSession() async {
+    try {
+      final String? authToken =
+          await FlutterSecureStorage().read(key: 'auth_token');
+      if (authToken == null || authToken.isEmpty) {
+        return null;
+      }
+      return authToken;
+    } catch (e) {
+      inspect(e);
+      return null;
+    }
   }
 
   @override
