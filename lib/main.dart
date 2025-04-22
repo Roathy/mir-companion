@@ -1,8 +1,5 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'features/00_splash/animated_splash_screen.dart';
@@ -26,8 +23,8 @@ Future<void> setRefreshRate(double rate) async {
 }
 
 void main() async {
-  setRefreshRate(60.0);
   WidgetsFlutterBinding.ensureInitialized();
+  setRefreshRate(60.0);
   runApp(ProviderScope(child: MyApp()));
 }
 
