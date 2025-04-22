@@ -6,7 +6,7 @@ import 'features/00_splash/animated_splash_screen.dart';
 import 'features/01_welcome_tour/welcome_tour_page.dart';
 import 'features/02_auth/presentation/screens/auth_screen.dart';
 import 'features/03_today/presentation/screens/today_screen.dart';
-import 'features/04_egp_leves/presentation/screens/students_egp_levels_screen.dart';
+import 'features/04_egp_levels/presentation/screens/students_egp_levels_screen.dart';
 
 import 'package:flutter/services.dart';
 
