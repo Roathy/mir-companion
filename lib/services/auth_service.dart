@@ -124,7 +124,6 @@ class AuthService {
       if (response.statusCode == 200) {
         await _storage.delete(
             key: 'auth_token'); // Borra el token del dispositivo
-        log('Logout successful');
       } else {
         log('Logout failed: ${response.statusCode}');
         throw Exception('Logout failed. Status code: ${response.statusCode}');
