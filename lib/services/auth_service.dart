@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
@@ -26,7 +27,7 @@ class AuthService {
     request.headers.addAll({
       'Content-Type': 'application/json',
       'X-Requested-With': 'XMLHttpRequest',
-      'Authorization': 'Bearer ${await _storage.read(key: 'token') ?? ''}',
+      'Authorization': 'Bearer ${await _storage.read(key: 'auth_token') ?? ''}',
       'X-App-MirHorizon': createMD5Hash(),
     });
 
@@ -42,9 +43,9 @@ class AuthService {
 
         if (decodedResponse.containsKey('data')) {
           final Map<String, dynamic> data = decodedResponse['data'];
-          if (data.containsKey('token')) {
-            final String accessToken = data['token'];
-            await _storage.write(key: 'token', value: accessToken);
+          if (data.containsKey('auth_token')) {
+            final String accessToken = data['auth_token'];
+            await _storage.write(key: 'auth_token', value: accessToken);
             return accessToken;
           } else {
             throw Exception(
@@ -69,7 +70,7 @@ class AuthService {
       Uri.parse(ApiConstants.userFetchURL),
     );
 
-    String? token = await _storage.read(key: 'token');
+    String? token = await _storage.read(key: 'auth_token');
     if (token == null || token.isEmpty) {
       throw Exception('No token found. Please login again.');
     }
@@ -77,7 +78,6 @@ class AuthService {
     request.headers.addAll({
       'X-Requested-With': 'XMLHttpRequest',
       'X-App-MirHorizon': createMD5Hash(),
-      // 'Authorization': 'Bearer ${await _storage.read(key: 'token') ?? ''}',
       'Authorization': 'Bearer $token',
     });
 
@@ -103,11 +103,34 @@ class AuthService {
     }
   }
 
-  Future<void> logout() async {
-    // await _storage.delete(key: 'token');
-    await _storage.write(
-      key: 'token_expiry',
-      value: DateTime.now().add(Duration(hours: 24)).toIso8601String(),
-    );
+  //todo: logout
+  Future<void> logoutUser() async {
+    final String? token = await _storage.read(key: 'auth_token');
+    if (token == null || token.isEmpty) {
+      throw Exception('No token found. User may already be logged out.');
+    }
+
+    final headers = {
+      'Authorization': 'Bearer $token',
+      'X-Requested-With': 'XMLHttpRequest',
+      'X-App-MirHorizon': createMD5Hash(),
+    };
+
+    final url = Uri.parse('https://api.mironline.io/api/v1/students/logout');
+
+    try {
+      final response = await http.get(url, headers: headers);
+
+      if (response.statusCode == 200) {
+        await _storage.delete(
+            key: 'auth_token'); // Borra el token del dispositivo
+        log('Logout successful');
+      } else {
+        log('Logout failed: ${response.statusCode}');
+        throw Exception('Logout failed. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Logout error: $e');
+    }
   }
 }
