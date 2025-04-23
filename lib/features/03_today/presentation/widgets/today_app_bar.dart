@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../services/auth_service.dart';
+import '../../../02_auth/presentation/screens/auth_screen.dart';
+
 class TodayAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String userName;
   final int mircoins;
@@ -49,10 +52,37 @@ class TodayAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
               const SizedBox(width: 4),
               PopupMenuButton<int>(
-                onSelected: (value) {
-                  if (value == 1) {
-                  } else if (value == 2) {
-                  } else if (value == 3) {}
+                onSelected: (value) async {
+                  if (value == 3) {
+                    try {
+                      await AuthService().logoutUser();
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Logout successful!'),
+                          // backgroundColor: Colors.green,
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+
+                      // Redirige al login después de un pequeño delay
+                      await Future.delayed(Duration(milliseconds: 500));
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                            builder: (context) => const LoginPage()),
+                        (Route<dynamic> route) => false,
+                      );
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content:
+                              Text('Error al cerrar sesión: ${e.toString()}'),
+                          backgroundColor: Colors.red,
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                  }
                 },
                 itemBuilder: (context) => [
                   _buildMenuItem(1, "Your Profile"),
