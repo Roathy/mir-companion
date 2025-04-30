@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/utils.dart';
-import '../../../network/api_endpoints.dart';
+import '../../../core/network/api_endpoints.dart';
 
 class ActivityRepository {
   final Dio dio;

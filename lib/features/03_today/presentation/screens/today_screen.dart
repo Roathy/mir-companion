@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/utils/utils.dart';
-import '../../../../network/api_endpoints.dart';
+import '../../../../core/network/api_endpoints.dart';
 import '../../../02_auth/presentation/screens/auth_screen.dart';
 import '../../../web_view_activity/presentation/screens/webview_activity_screen_refactor.dart';
 import '../widgets/bg_image_container.dart';

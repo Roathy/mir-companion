@@ -4,7 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/utils.dart';
-import '../../../../network/api_endpoints.dart';
+import '../../../../core/network/api_endpoints.dart';
 import '../../../02_auth/presentation/screens/auth_screen.dart';
 import '../../../06_unit_activities/presentation/screens/unit_activities_screen.dart';
 

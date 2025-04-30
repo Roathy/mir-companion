@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mironline/features/06_unit_activities/presentation/widgets/export_unit_activities_widgets.dart';
 
 import '../../../../core/utils/utils.dart';
-import '../../../../network/api_endpoints.dart';
+import '../../../../core/network/api_endpoints.dart';
 import '../../../02_auth/presentation/screens/auth_screen.dart';
 import '../../../05_egp_units/presentation/screens/levels_s_units_screen.dart';
 import '../../../web_view_activity/presentation/screens/webview_activity_screen_refactor.dart';

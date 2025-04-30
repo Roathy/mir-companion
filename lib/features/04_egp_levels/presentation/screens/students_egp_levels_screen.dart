@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/utils.dart';
 import '../../../05_egp_units/presentation/screens/levels_s_units_screen.dart';
-import '../../../../network/api_endpoints.dart';
+import '../../../../core/network/api_endpoints.dart';
 import '../../../02_auth/presentation/screens/auth_screen.dart';
 import '../widgets/code_activation_screen.dart';
 

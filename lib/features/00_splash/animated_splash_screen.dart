@@ -31,7 +31,6 @@ class AnimatedSplashScreenState extends ConsumerState<AnimatedSplashScreen>
           (token) {
             inspect(token);
             if (mounted) {
-              // Guard with mounted
               if (token != null && token.isNotEmpty) {
                 ref.read(authTokenProvider.notifier).state = token;
                 Navigator.pushReplacementNamed(context, '/home');

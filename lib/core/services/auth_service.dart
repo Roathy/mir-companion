@@ -6,7 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
-import '../../constants/api_constants.dart';
+import '../../../constants/api_constants.dart';
 
 class AuthService {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
