@@ -27,6 +27,7 @@ dependencies:
   riverpod_annotation: ^2.2.0
   crypto: ^3.0.6
   webview_flutter: ^4.10.0
+  get_it: ^8.0.3
 
 
 dev_dependencies:
