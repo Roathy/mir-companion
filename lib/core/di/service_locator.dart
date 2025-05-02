@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:mironline/core/infra/storage/secure_storage.dart';
 
 import '../../features/02_auth_refactor/auth_module.dart';
+import '../../features/02_auth_refactor/splash_module.dart';
 
 final sl = GetIt.instance;
 
@@ -17,4 +18,5 @@ Future<void> initDependencies() async {
 
   // Features
   await initAuthModule();
+  await initSplashModule();
 }
