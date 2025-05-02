@@ -2,6 +2,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mironline/core/infra/storage/secure_storage.dart';
 
+import '../../features/02_auth_refactor/auth_module.dart';
+
 final sl = GetIt.instance;
 
 Future<void> initDependencies() async {
@@ -12,4 +14,7 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton<SecureStorageService>(
     () => SecureStorageServiceImpl(sl()),
   );
+
+  // Features
+  await initAuthModule();
 }
