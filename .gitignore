@@ -91,3 +91,15 @@ build/
 
 # VS Code specific
 .vscode/
+
+# Security - Environment variables
+.env
+.env.production
+.env.local
+*.pem
+*.key
+*.crt
+
+# Logs and crash reports
+flutter_log.txt
+*.log

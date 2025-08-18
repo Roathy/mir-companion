@@ -1,10 +1,13 @@
-import 'dart:convert';
+import '../config/app_config.dart';
 
-import 'package:crypto/crypto.dart';
-
+/// ✅ SEGURO: Genera hash MD5 usando configuración segura
+/// Reemplaza la función anterior que tenía secret hardcodeado
 String createMD5Hash() {
-  DateTime now = DateTime.now();
-  String formattedDate =
-      '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
-  return md5.convert(utf8.encode('752486-$formattedDate')).toString();
+  return AppConfig.createSecureHash();
+}
+
+/// Función deprecada - Usar createMD5Hash() en su lugar
+@Deprecated('Use createMD5Hash() instead. This function had hardcoded secrets.')
+String createMD5HashOld() {
+  throw Exception('This function is deprecated due to security vulnerabilities. Use createMD5Hash() instead.');
 }
