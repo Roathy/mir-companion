@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/cupertino.dart';
@@ -24,7 +25,14 @@ Future<void> setRefreshRate(double rate) async {
   }
 }
 
-void main() async {
+// void main() async {
+//   WidgetsFlutterBinding.ensureInitialized();
+//   setRefreshRate(60.0);
+//   runApp(ProviderScope(child: MyApp()));
+// }
+
+Future<void> main() async {
+  await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
   setRefreshRate(60.0);
   runApp(ProviderScope(child: MyApp()));

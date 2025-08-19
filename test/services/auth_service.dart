@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
@@ -11,7 +11,7 @@ class AuthService {
   String createMD5Hash() {
     DateTime now = DateTime.now();
     final String month = now.month.toString().padLeft(2, '0');
-    String toHash = '752486-${now.year}$month${now.day}';
+    String toHash = '${dotenv.env['SECRET_KEY']}-${now.year}$month${now.day}';
     return md5.convert(utf8.encode(toHash)).toString();
   }
 

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -130,88 +128,76 @@ class LoginPageState extends ConsumerState<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.only(left: 24, top: 150, right: 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Hero(
-              tag: 'mironline-logo',
-              child: Image.asset('assets/logo.png', width: 240),
-            ),
-            const SizedBox(height: 16),
-            Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
-                side: BorderSide(color: Colors.grey.shade400),
-              ),
-              color: Colors.white,
-              elevation: 2,
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-                child: Column(
-                  spacing: 12,
-                  children: [
-                    Text(
-                      "Student Login",
-                      style: GoogleFonts.poppins(
-                        fontSize: 28,
-                        color: Colors.blue[400],
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    GoogleLoginButton(),
-                    OrDivider(),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.mail_outline, color: Colors.blue[900]),
-                        const SizedBox(width: 6),
-                        Text(
-                          "Login with e-mail",
-                          style: GoogleFonts.poppins(
-                            fontSize: 15,
-                            color: Colors.blue[900],
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Card(
+        body: SingleChildScrollView(
+            padding: const EdgeInsets.only(left: 24, top: 150, right: 24),
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Hero(
+                    tag: 'mironline-logo',
+                    child: Image.asset('assets/logo.png', width: 240),
+                  ),
+                  const SizedBox(height: 16),
+                  Card(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(6),
+                        side: BorderSide(color: Colors.grey.shade400),
                       ),
-                      color: Colors.grey.shade100,
-                      elevation: 1,
+                      color: Colors.white,
+                      elevation: 2,
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 16, horizontal: 12),
-                        child: Column(
-                          spacing: 12,
-                          children: [
-                            LoginTextField(
-                              controller: _emailController,
-                              label: "Your e-mail:",
-                              obscureText: false,
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 20, horizontal: 16),
+                          child: Column(spacing: 12, children: [
+                            Text(
+                              "Student Login",
+                              style: GoogleFonts.poppins(
+                                fontSize: 28,
+                                color: Colors.blue[400],
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                            LoginTextField(
-                              controller: _passwordController,
-                              label: "Your password:",
-                              obscureText: true,
+                            GoogleLoginButton(),
+                            OrDivider(),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.mail_outline,
+                                    color: Colors.blue[900]),
+                                const SizedBox(width: 6),
+                                Text(
+                                  "Login with e-mail",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 15,
+                                    color: Colors.blue[900],
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                              ],
                             ),
-                            LoginButton(handleLogin: _handleLogin),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+                            Card(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                color: Colors.grey.shade100,
+                                elevation: 1,
+                                child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 16, horizontal: 12),
+                                    child: Column(spacing: 12, children: [
+                                      LoginTextField(
+                                        controller: _emailController,
+                                        label: "Your e-mail:",
+                                        obscureText: false,
+                                      ),
+                                      LoginTextField(
+                                        controller: _passwordController,
+                                        label: "Your password:",
+                                        obscureText: true,
+                                      ),
+                                      LoginButton(handleLogin: _handleLogin),
+                                    ])))
+                          ])))
+                ])));
   }
 }

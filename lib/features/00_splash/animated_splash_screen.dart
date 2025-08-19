@@ -26,22 +26,24 @@ class AnimatedSplashScreenState extends ConsumerState<AnimatedSplashScreen>
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
-    )..forward().whenComplete(() {
-        hasSessionFuture.then(
-          (token) {
-            inspect(token);
-            if (mounted) {
-              // Guard with mounted
-              if (token != null && token.isNotEmpty) {
-                ref.read(authTokenProvider.notifier).state = token;
-                Navigator.pushReplacementNamed(context, '/home');
-              } else {
-                Navigator.pushReplacementNamed(context, '/login');
+    )..forward().whenComplete(
+        () {
+          hasSessionFuture.then(
+            (token) {
+              inspect(token);
+              if (mounted) {
+                // Guard with mounted
+                if (token != null && token.isNotEmpty) {
+                  ref.read(authTokenProvider.notifier).state = token;
+                  Navigator.pushReplacementNamed(context, '/home');
+                } else {
+                  Navigator.pushReplacementNamed(context, '/login');
+                }
               }
-            }
-          },
-        );
-      });
+            },
+          );
+        },
+      );
   }
 
   Future<String?> getLastSession() async {

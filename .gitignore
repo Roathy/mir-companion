@@ -9,57 +9,48 @@
 .history
 .svn/
 migrate_working_dir/
+Thumbs.db
+.env
 
 # IntelliJ related
 *.iml
 *.ipr
 *.iws
 .idea/
+.idea/caches/
+.idea/libraries/
 android/app/.cxx/
 build_log.txt
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
+# VS Code
+.vscode/
 
 # Flutter/Dart/Pub related
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+.packages
 **/doc/api/
 **/ios/Flutter/.last_build_id
-.dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
-.pub-cache/
-.pub/
-/build/
 
-# Symbolication related
+# Build output
+/build/
+**/build/
+.android/
+.ios/
+
+# Symbolication
 app.*.symbols
 
-# Obfuscation related
+# Obfuscation
 app.*.map.json
-
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
-
-# Flutter/Dart specific
-**/doc/api/
-.dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
-.packages
-.pub-cache/
-.pub/
-build/
 
 # Android specific
 **/android/**/gradle-wrapper.jar
 **/android/.gradle
 **/android/captures/
-**/android/gradlew
-**/android/gradlew.bat
 **/android/local.properties
 **/android/**/GeneratedPluginRegistrant.java
 
@@ -89,5 +80,26 @@ build/
 **/ios/ServiceDefinitions.json
 **/ios/Runner/GeneratedPluginRegistrant.*
 
-# VS Code specific
-.vscode/
+# Keystore files
+*.jks
+*.keystore
+*.jks.old
+**/key.properties
+
+# Gradle
+.gradle/
+
+# Output bundles & APKs
+*.aab
+*.apk
+
+# NDK / CMake cache
+.cxx/
+
+# Android Studio memory dumps
+*.hprof
+
+# Build variants
+/android/app/debug
+/android/app/profile
+/android/app/release
