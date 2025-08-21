@@ -21,7 +21,8 @@ Future<void> setRefreshRate(double rate) async {
   try {
     await platform.invokeMethod('setRefreshRate', {'rate': rate});
   } catch (e) {
-    print('Error: $e');
+    // TODO
+    // manage error when failing to set the refresh rate
   }
 }
 
