@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+  <domain-config cleartextTrafficPermitted="false">
+      <!-- ✅ SOLO HTTPS para API principal -->
+      <domain includeSubdomains="true">api.mironline.io</domain>
+      
+      <!-- ✅ Certificate pinning para máxima seguridad -->
+      <!-- <pin-set expiration="2026-01-01"> -->
+          <!-- Pin del certificado de api.mironline.io (debe obtenerse) -->
+          <!-- <pin digest="SHA-256">PLACEHOLDER_CERTIFICATE_PIN_HERE</pin> -->
+          <!-- Pin de backup (certificado de respaldo) -->
+          <!-- <pin digest="SHA-256">PLACEHOLDER_BACKUP_PIN_HERE</pin> -->
+      <!-- </pin-set> -->
+      
+      <!-- ✅ Confianza solo en certificados del sistema -->
+      <trust-anchors>
+          <certificates src="system"/>
+      </trust-anchors>
+  </domain-config>
+  
+  <!-- ✅ Configuración por defecto: NO cleartext -->
+  <base-config cleartextTrafficPermitted="false">
+      <trust-anchors>
+          <certificates src="system"/>
+      </trust-anchors>
+  </base-config>
+</network-security-config>
