@@ -34,11 +34,24 @@ android {
 
     signingConfigs {
         release {
-            if (keystoreProperties.containsKey('storeFile')) {
+            // Prioridad a variables de entorno para CI/CD
+            if (System.getenv("KEYSTORE_FILE") != null) {
+                storeFile file(System.getenv("KEYSTORE_FILE"))
+                storePassword System.getenv("KEYSTORE_PASSWORD")
+                keyAlias System.getenv("KEY_ALIAS")
+                keyPassword System.getenv("KEY_PASSWORD")
+            } else if (keystoreProperties.containsKey('storeFile')) {
+                // Fallback a key.properties local
                 storeFile file(keystoreProperties['storeFile'])
                 storePassword keystoreProperties['storePassword']
                 keyAlias keystoreProperties['keyAlias']
                 keyPassword keystoreProperties['keyPassword']
+            } else {
+                throw new GradleException(
+                    "Release signing configuration is missing! " +
+                    "Please configure key.properties or environment variables " +
+                    "(KEYSTORE_FILE, KEYSTORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD)"
+                )
             }
         }
     }

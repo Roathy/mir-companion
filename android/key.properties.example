@@ -1,0 +1,20 @@
+# Ejemplo de configuración de firma para mironline companion app
+# INSTRUCCIONES: Copiar este archivo a key.properties y configurar valores reales
+
+# Contraseña del keystore (usar una contraseña fuerte de 25+ caracteres)
+storePassword=YOUR_SECURE_STORE_PASSWORD_HERE
+
+# Contraseña de la clave específica (usar una contraseña fuerte de 25+ caracteres)
+keyPassword=YOUR_SECURE_KEY_PASSWORD_HERE
+
+# Alias de la clave en el keystore
+keyAlias=mironline-release-key
+
+# Ruta al archivo keystore (relativa al directorio android/)
+storeFile=app/mironline-release-key.jks
+
+# IMPORTANTE:
+# 1. Las contraseñas deben ser diferentes y seguras
+# 2. El keystore debe generarse con: keytool -genkey -v -keystore android/app/mironline-release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias mironline-release-key
+# 3. Este archivo debe mantenerse seguro y no incluirse en control de versiones
+# 4. Para producción, considerar usar variables de entorno en lugar de este archivo
