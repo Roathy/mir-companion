@@ -10,7 +10,15 @@
 .svn/
 migrate_working_dir/
 Thumbs.db
+# Variables de entorno sensibles
 .env
+.env.local
+.env.production
+.env.development
+.env.staging
+*.env
+# Excepto template de ejemplo
+!.env.example
 
 # IntelliJ related
 *.iml
