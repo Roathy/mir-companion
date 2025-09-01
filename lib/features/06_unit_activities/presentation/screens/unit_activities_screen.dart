@@ -7,7 +7,7 @@ import '../../../../core/utils/utils.dart';
 import '../../../../network/api_endpoints.dart';
 import '../../../02_auth/presentation/screens/auth_screen.dart';
 import '../../../05_egp_units/presentation/screens/levels_s_units_screen.dart';
-import '../../../web_view_activity/presentation/screens/webview_activity_screen_refactor.dart';
+import '../../../web_view_activity/presentation/screens/webview_activity_screen.dart';
 
 final studentUnitsActivities = FutureProvider.autoDispose
     .family<Map<String, dynamic>?, String>((ref, queryParam) async {

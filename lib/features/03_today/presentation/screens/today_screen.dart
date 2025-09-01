@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/utils/utils.dart';
 import '../../../../network/api_endpoints.dart';
 import '../../../02_auth/presentation/screens/auth_screen.dart';
-import '../../../web_view_activity/presentation/screens/webview_activity_screen_refactor.dart';
+import '../../../web_view_activity/presentation/screens/webview_activity_screen.dart';
 import '../widgets/bg_image_container.dart';
 import '../widgets/today_app_bar.dart';
 
