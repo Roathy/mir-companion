@@ -34,7 +34,7 @@ abstract class AuthManager {
   Future<bool> validateCurrentToken();
 
   /// Stream of authentication state changes
-  Stream<AuthenticationState> get authStateStream;
+  Stream<AuthStateChangeEvent> get authStateStream;
 }
 
 /// Authentication state for the entire application

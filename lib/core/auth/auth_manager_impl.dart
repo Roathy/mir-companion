@@ -84,7 +84,6 @@ class AuthManagerImpl implements AuthManager {
           );
         } else {
           // Get current stored token
-          final authState = _ref.read(authControllerProvider);
           final authState = _ref.read(auth_providers.authControllerProvider);
           if (authState.isAuthenticated) {
             // Get stored token from repository  

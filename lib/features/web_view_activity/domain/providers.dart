@@ -3,13 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../02_auth/presentation/screens/auth_screen.dart';
-import '../data/activity_repository.dart';
+import '../../../shared/services/authenticated_http_service.dart';
+import '../data/activity_repository_refactored.dart';
 
-final activityRepositoryProvider = Provider<ActivityRepository>((ref) {
-  final dio = ref.read(dioProvider);
-  final authToken = ref.read(authTokenProvider);
-  return ActivityRepository(dio: dio, authToken: authToken);
+final activityRepositoryProvider = Provider<ActivityRepositoryRefactored>((ref) {
+  final httpService = ref.read(authenticatedHttpServiceProvider);
+  return ActivityRepositoryRefactored(httpService: httpService);
 });
 
 final unitActivityProvider = FutureProvider.autoDispose
