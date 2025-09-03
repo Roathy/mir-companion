@@ -33,8 +33,8 @@ class TodayAppBar extends StatelessWidget implements PreferredSizeWidget {
           Row(
             children: [
               IconButton(
-                icon: const Icon(Icons.groups, color: Colors.black),
-                onPressed: () {},
+                icon: const Icon(Icons.groups, color: Colors.grey),
+                onPressed: null,
               ),
               Row(
                 children: [
@@ -57,36 +57,38 @@ class TodayAppBar extends StatelessWidget implements PreferredSizeWidget {
                     try {
                       await AuthService().logoutUser();
 
+                      if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
+                        const SnackBar(
                           content: Text('Logout successful!'),
-                          // backgroundColor: Colors.green,
                           duration: Duration(seconds: 2),
                         ),
                       );
 
                       // Redirige al login después de un pequeño delay
-                      await Future.delayed(Duration(milliseconds: 500));
+                      await Future.delayed(const Duration(milliseconds: 500));
+                      if (!context.mounted) return;
                       Navigator.of(context).pushAndRemoveUntil(
                         MaterialPageRoute(
                             builder: (context) => const LoginPage()),
                         (Route<dynamic> route) => false,
                       );
                     } catch (e) {
+                      if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content:
                               Text('Error al cerrar sesión: ${e.toString()}'),
                           backgroundColor: Colors.red,
-                          duration: Duration(seconds: 2),
+                          duration: const Duration(seconds: 2),
                         ),
                       );
                     }
                   }
                 },
                 itemBuilder: (context) => [
-                  _buildMenuItem(1, "Your Profile"),
-                  _buildMenuItem(2, "Help & Support"),
+                  // _buildMenuItem(1, "Your Profile"),
+                  // _buildMenuItem(2, "Help & Support"),
                   _buildMenuItem(3, "Logout"),
                 ],
                 child: CircleAvatar(

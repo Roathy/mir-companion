@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -59,6 +61,7 @@ class _StudentTodayScreenState extends ConsumerState<StudentTodayScreen> {
                   SafeArea(child: Center(child: Text("No profile data found"))),
             );
           } else {
+            log('profileData: $profileData');
             final alumno = profileData['alumno'];
             final egp = profileData['actividades_siguientes']['egp'];
             final String activityBgImgUrl = egp['cover_actividad'];

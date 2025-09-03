@@ -30,7 +30,7 @@ class _WelcomeTourPageState extends ConsumerState<WelcomeTourPage> {
             ))
         .toList();
 
-    final isLastSlide = _currentSlideIndex == slides.length - 1;
+    final isLastSlide = ref.watch(_currentSlideIndex) == slides.length - 1;
 
     return Scaffold(
         body: SafeArea(

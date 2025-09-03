@@ -82,13 +82,9 @@ class LoginPageState extends ConsumerState<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  bool _isLoggingIn = false;
-  String? _loginErrorMessage;
-
   void _handleLogin() async {
-    setState(() {
-      _isLoggingIn = true;
-    });
+    // Since we are not showing a loading indicator, we can remove the initial setState.
+    // If a loading indicator is added later, it should be managed here.
 
     LoginResult result = await login(
       ref,
@@ -96,31 +92,33 @@ class LoginPageState extends ConsumerState<LoginPage> {
       _passwordController.text.trim(),
     );
 
-    setState(() {
-      _isLoggingIn = false;
-      _loginErrorMessage = result.message; // Show error message if any
-    });
+    if (!mounted) return; // Check if the widget is still in the tree.
+
+    // The second setState was also related to the unused variables, so it's removed.
 
     if (result.status == LoginStatus.success) {
       // Show success message and navigate
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
             content: Text("Login successful! Redirecting..."),
             duration: Duration(seconds: 2)),
       );
 
-      Future.delayed(Duration(seconds: 2), () {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const StudentTodayScreen()),
-        );
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) {
+          // Also check here before navigating.
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const StudentTodayScreen()),
+          );
+        }
       });
     } else {
       // Show failure message from the server in the SnackBar
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
             content: Text(result.message ?? "Login failed."),
-            duration: Duration(seconds: 2)),
+            duration: const Duration(seconds: 2)),
       );
     }
   }
@@ -192,7 +190,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
                                       ),
                                       LoginTextField(
                                         controller: _passwordController,
-                                        label: "Your password:",
+                                        label: "Your password",
                                         obscureText: true,
                                       ),
                                       LoginButton(handleLogin: _handleLogin),

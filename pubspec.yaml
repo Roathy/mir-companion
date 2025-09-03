@@ -2,7 +2,7 @@ name: mironline
 description: "Pocket version for make it real and mironline language learning resources!"
 publish_to: 'none' 
 
-version: 1.0.0+2
+version: 1.0.0+4
 
 environment:
   sdk: ^3.5.3
@@ -28,6 +28,7 @@ dependencies:
   crypto: ^3.0.6
   webview_flutter: ^4.10.0
   flutter_dotenv: ^5.2.1
+  http: ^1.5.0
 
 
 dev_dependencies:
@@ -60,7 +61,6 @@ flutter:
 
   assets:
     - .env
-
     - assets/logo.png
     - assets/images/
     - assets/images/google_logo.png

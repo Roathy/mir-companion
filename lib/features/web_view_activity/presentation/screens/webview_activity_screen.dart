@@ -33,6 +33,7 @@ class WebViewActivity extends ConsumerWidget {
         onPopInvoked: (bool didPop) async {
           if (didPop) return;
           final bool shouldExit = await _showExitConfirmationDialog(context);
+          if (!context.mounted) return;
           if (shouldExit) {
             ref.invalidate(studentUnitsActivities);
             Navigator.pop(context);

@@ -13,8 +13,10 @@ class AuthService {
 
   String createMD5Hash() {
     DateTime now = DateTime.now();
+    final String day = now.day.toString().padLeft(2, '0');
     final String month = now.month.toString().padLeft(2, '0');
-    String toHash = '${dotenv.env['SECRET_KEY']}-${now.year}$month${now.day}';
+    String toHash = '${dotenv.env['SECRET_KEY']}-${now.year}$month$day';
+    log('toHash: $toHash');
     return md5.convert(utf8.encode(toHash)).toString();
   }
 
@@ -105,7 +107,7 @@ class AuthService {
 
   //todo: logout
   Future<void> logoutUser() async {
-    final String? token = await _storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
     if (token == null || token.isEmpty) {
       throw Exception('No token found. User may already be logged out.');
     }
@@ -114,8 +116,7 @@ class AuthService {
     final headers = {
       'Authorization': 'Bearer $token',
       'X-Requested-With': 'XMLHttpRequest',
-      'X-App-MirHorizon':
-          createMD5Hash(), 
+      'X-App-MirHorizon': createMD5Hash(),
     };
 
     final url = Uri.parse('https://api.mironline.io/api/v1/students/logout');
