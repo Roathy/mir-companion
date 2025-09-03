@@ -110,22 +110,28 @@ class AuthService {
       throw Exception('No token found. User may already be logged out.');
     }
 
+    // Las cabeceras exactas que pide la documentación
     final headers = {
       'Authorization': 'Bearer $token',
       'X-Requested-With': 'XMLHttpRequest',
-      'X-App-MirHorizon': createMD5Hash(),
+      'X-App-MirHorizon':
+          createMD5Hash(), 
     };
 
     final url = Uri.parse('https://api.mironline.io/api/v1/students/logout');
+    log('Attempting logout with GET to $url');
+    log('Headers: $headers');
 
     try {
+      // Usando el método GET, como lo especifica la documentación
       final response = await http.get(url, headers: headers);
 
       if (response.statusCode == 200) {
-        await _storage.delete(
-            key: 'auth_token'); // Borra el token del dispositivo
+        log('Logout successful: ${response.body}');
+        await _storage.delete(key: 'auth_token');
       } else {
-        log('Logout failed: ${response.statusCode}');
+        log('Logout failed with status: ${response.statusCode}');
+        log('Response body: ${response.body}');
         throw Exception('Logout failed. Status code: ${response.statusCode}');
       }
     } catch (e) {
