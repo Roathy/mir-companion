@@ -37,8 +37,7 @@ Future<void> setRefreshRate(double rate) async {
 Future<void> main() async {
   await dotenv.load(fileName: ".env");
 
-  // AÑADE ESTA LÍNEA PARA DEPURAR
-  log('🔑 SECRET_KEY loaded from .env: ${dotenv.env['SECRET_KEY']}');
+  
   WidgetsFlutterBinding.ensureInitialized();
   setRefreshRate(60.0);
   runApp(ProviderScope(child: MyApp()));

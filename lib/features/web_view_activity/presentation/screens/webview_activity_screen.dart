@@ -195,20 +195,21 @@ class NoActivityAttemptsNotice extends ConsumerWidget {
     ref.listen(buyAttemptNotifierProvider, (previous, next) {
       if (!context.mounted) return;
 
-      if (previous?.value != BuyAttemptState.success &&
-          next.hasValue &&
-          next.value == BuyAttemptState.success) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text("✅ Extra attempt purchased successfully!"),
-            backgroundColor: Colors.green));
-      } else if (previous?.error != next.error && next.hasError) {
-        final error = next.error;
-        final errorMessage = (error is Exception)
-            ? error.toString().replaceFirst('Exception: ', '')
-            : "❌ Failed to purchase attempt!";
-
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(errorMessage), backgroundColor: Colors.red));
+      switch (next) {
+        case AsyncData(:final value):
+          if (value == BuyAttemptState.success) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text("✅ Extra attempt purchased successfully!"),
+                backgroundColor: Colors.green));
+          }
+        case AsyncError(:final error):
+          final errorMessage = (error is Exception)
+              ? error.toString().replaceFirst('Exception: ', '')
+              : "❌ Failed to purchase attempt!";
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(errorMessage), backgroundColor: Colors.red));
+        default:
+          break;
       }
     });
 
@@ -272,9 +273,9 @@ class NoActivityAttemptsNotice extends ConsumerWidget {
                   child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: ElevatedButton(
-                          onPressed: buyAttemptState.isLoading
-                              ? null
-                              : () async {
+                          onPressed: buyAttemptState.maybeWhen(
+                              loading: () => null,
+                              orElse: () => () async {
                                   if (activityId == null || activityId! <= 0) {
                                     debugPrint(
                                         "Invalid activity ID: $activityId");
@@ -289,14 +290,15 @@ class NoActivityAttemptsNotice extends ConsumerWidget {
                                         "Error in buy attempt button: $e");
                                   }
                                 },
+                            ),
                           style: ButtonStyle(
                             alignment: Alignment.center,
                             backgroundColor:
                                 WidgetStateProperty.all(Colors.green),
                           ),
-                          child: buyAttemptState.isLoading
-                              ? CircularProgressIndicator(color: Colors.white)
-                              : Row(
+                          child: buyAttemptState.maybeWhen(
+                              loading: () => CircularProgressIndicator(color: Colors.white),
+                              orElse: () => Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                       Icon(Icons.star,
@@ -307,7 +309,7 @@ class NoActivityAttemptsNotice extends ConsumerWidget {
                                               color: Colors.white,
                                               fontWeight: FontWeight.w700,
                                               fontSize: 18))
-                                    ]))))
+                                    ])))))
           ])
         ]));
   }

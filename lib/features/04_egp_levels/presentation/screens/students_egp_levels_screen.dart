@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
 import '../../../../core/utils/utils.dart';
 import '../../../05_egp_units/presentation/screens/levels_s_units_screen.dart';

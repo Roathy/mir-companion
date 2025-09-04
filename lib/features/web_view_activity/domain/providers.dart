@@ -27,7 +27,7 @@ final unitActivityProvider = FutureProvider.autoDispose
 
 enum BuyAttemptState { initial, loading, success, error }
 
-class BuyAttemptNotifier extends AutoDisposeAsyncNotifier<BuyAttemptState> {
+class BuyAttemptNotifier extends AsyncNotifier<BuyAttemptState> {
   String? errorMessage;
 
   @override
@@ -64,5 +64,5 @@ class BuyAttemptNotifier extends AutoDisposeAsyncNotifier<BuyAttemptState> {
 }
 
 final buyAttemptNotifierProvider =
-    AutoDisposeAsyncNotifierProvider<BuyAttemptNotifier, BuyAttemptState>(
+    AsyncNotifierProvider<BuyAttemptNotifier, BuyAttemptState>(
         () => BuyAttemptNotifier());

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -94,8 +95,6 @@ class LoginPageState extends ConsumerState<LoginPage> {
 
     if (!mounted) return; // Check if the widget is still in the tree.
 
-    // The second setState was also related to the unused variables, so it's removed.
-
     if (result.status == LoginStatus.success) {
       // Show success message and navigate
       ScaffoldMessenger.of(context).showSnackBar(
@@ -106,7 +105,6 @@ class LoginPageState extends ConsumerState<LoginPage> {
 
       Future.delayed(const Duration(seconds: 2), () {
         if (mounted) {
-          // Also check here before navigating.
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const StudentTodayScreen()),
@@ -185,7 +183,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
                                     child: Column(spacing: 12, children: [
                                       LoginTextField(
                                         controller: _emailController,
-                                        label: "Your e-mail:",
+                                        label: "Your e-mail",
                                         obscureText: false,
                                       ),
                                       LoginTextField(
