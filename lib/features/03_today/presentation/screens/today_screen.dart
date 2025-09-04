@@ -13,11 +13,15 @@ import '../../../web_view_activity/presentation/screens/webview_activity_screen.
 import '../widgets/bg_image_container.dart';
 import '../widgets/today_app_bar.dart';
 
+import '../widgets/no_profile_data.dart';
+
 final studentTodayProvider =
     FutureProvider.autoDispose<Map<String, dynamic>?>((ref) async {
   try {
     final dio = ref.read(dioProvider);
+    log('dio: $dio');
     final authToken = ref.read(authTokenProvider);
+    log('authToken: $authToken');
 
     if (authToken.isEmpty) {
       debugPrint("No auth token found");
@@ -25,6 +29,7 @@ final studentTodayProvider =
     }
 
     String fullUrl = "${ApiEndpoints.baseURL}${ApiEndpoints.studentsProfile}";
+    log('fullUrl: $fullUrl');
 
     Response response = await dio.get(
       fullUrl,
@@ -34,6 +39,7 @@ final studentTodayProvider =
         "Authorization": "Bearer $authToken",
       }),
     );
+    log('response: ${response.data}');
     return response.data['data'];
   } catch (e) {
     debugPrint("Error fetching student today: $e");
@@ -56,10 +62,7 @@ class _StudentTodayScreenState extends ConsumerState<StudentTodayScreen> {
     return profileAsync.when(
         data: (profileData) {
           if (profileData == null) {
-            return const Scaffold(
-              body:
-                  SafeArea(child: Center(child: Text("No profile data found"))),
-            );
+            return const NoProfileData();
           } else {
             log('profileData: $profileData');
             final alumno = profileData['alumno'];
