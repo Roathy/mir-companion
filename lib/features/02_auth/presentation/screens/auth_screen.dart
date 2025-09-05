@@ -84,9 +84,6 @@ class LoginPageState extends ConsumerState<LoginPage> {
   final _passwordController = TextEditingController();
 
   void _handleLogin() async {
-    // Since we are not showing a loading indicator, we can remove the initial setState.
-    // If a loading indicator is added later, it should be managed here.
-
     LoginResult result = await login(
       ref,
       _emailController.text.trim(),
