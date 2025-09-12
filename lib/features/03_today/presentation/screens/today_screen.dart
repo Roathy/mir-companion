@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:mironline/features/web_view_activity/presentation/screens/webview_activity_screen.dart';
 
 import '../../../../core/utils/utils.dart';
 import '../../../../network/api_endpoints.dart';
 import '../../../02_auth/presentation/screens/auth_screen.dart';
-import '../../../web_view_activity/presentation/screens/webview_activity_screen.dart';
 import '../widgets/bg_image_container.dart';
 import '../widgets/today_app_bar.dart';
 

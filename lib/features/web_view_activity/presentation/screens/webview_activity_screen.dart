@@ -33,7 +33,6 @@ class WebViewActivity extends ConsumerWidget {
         onPopInvoked: (bool didPop) async {
           if (didPop) return;
           final bool shouldExit = await _showExitConfirmationDialog(context);
-          if (!context.mounted) return;
           if (shouldExit) {
             ref.invalidate(studentUnitsActivities);
             Navigator.pop(context);
@@ -47,7 +46,7 @@ class WebViewActivity extends ConsumerWidget {
                     loading: () =>
                         const Center(child: CircularProgressIndicator()),
                     error: (error, stackTrace) {
-                      // TODO: Add proper error handling
+                      debugPrint("Error loading activity: $error");
 
                       String errorMessage =
                           "Something went wrong. Please try again later.";
@@ -108,8 +107,7 @@ class WebViewActivity extends ConsumerWidget {
         _handleJavaScriptMessage(message, actionHandlers);
       })
       ..setNavigationDelegate(NavigationDelegate(
-        onPageStarted: (url) => 
-        // TODO: Add proper error handling,
+        onPageStarted: (url) => debugPrint('Page started loading: $url'),
         onPageFinished: (url) {
           _injectJavaScript(controller);
         },
@@ -123,7 +121,7 @@ class WebViewActivity extends ConsumerWidget {
     JavaScriptMessage message,
     Map<String, void Function()> actionHandlers,
   ) {
-    // TODO: Add proper error handling
+    debugPrint('Message from WebView: ${message.message}');
     try {
       final Map<String, dynamic> messageData = jsonDecode(message.message);
       final String action = messageData['action'];
@@ -132,10 +130,10 @@ class WebViewActivity extends ConsumerWidget {
       if (actionHandlers.containsKey(action)) {
         actionHandlers[action]!(); // Call the handler function
       } else {
-        // TODO: Add proper error handling
+        debugPrint('Unknown action: $action');
       }
     } catch (e) {
-      // TODO: Add proper error handling
+      debugPrint('Failed to parse message: $e');
     }
   }
 
@@ -196,21 +194,20 @@ class NoActivityAttemptsNotice extends ConsumerWidget {
     ref.listen(buyAttemptNotifierProvider, (previous, next) {
       if (!context.mounted) return;
 
-      switch (next) {
-        case AsyncData(:final value):
-          if (value == BuyAttemptState.success) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text("✅ Extra attempt purchased successfully!"),
-                backgroundColor: Colors.green));
-          }
-        case AsyncError(:final error):
-          final errorMessage = (error is Exception)
-              ? error.toString().replaceFirst('Exception: ', '')
-              : "❌ Failed to purchase attempt!";
-          ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(errorMessage), backgroundColor: Colors.red));
-        default:
-          break;
+      if (previous?.value != BuyAttemptState.success &&
+          next.hasValue &&
+          next.value == BuyAttemptState.success) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text("✅ Extra attempt purchased successfully!"),
+            backgroundColor: Colors.green));
+      } else if (previous?.error != next.error && next.hasError) {
+        final error = next.error;
+        final errorMessage = (error is Exception)
+            ? error.toString().replaceFirst('Exception: ', '')
+            : "❌ Failed to purchase attempt!";
+
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(errorMessage), backgroundColor: Colors.red));
       }
     });
 
@@ -274,29 +271,31 @@ class NoActivityAttemptsNotice extends ConsumerWidget {
                   child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: ElevatedButton(
-                          onPressed: buyAttemptState.maybeWhen(
-                              loading: () => null,
-                              orElse: () => () async {
+                          onPressed: buyAttemptState.isLoading
+                              ? null
+                              : () async {
                                   if (activityId == null || activityId! <= 0) {
-                                    // TODO: Add proper error handling
+                                    debugPrint(
+                                        "Invalid activity ID: $activityId");
                                     return;
                                   }
                                   try {
-                                    // TODO: Add proper error handling
+                                    debugPrint(
+                                        "Buy attempt button pressed for activity ID: $activityId");
                                     await notifier.buyAttempt(activityId!);
                                   } catch (e) {
-                                    // TODO: Add proper error handling
+                                    debugPrint(
+                                        "Error in buy attempt button: $e");
                                   }
                                 },
-                            ),
                           style: ButtonStyle(
                             alignment: Alignment.center,
                             backgroundColor:
                                 WidgetStateProperty.all(Colors.green),
                           ),
-                          child: buyAttemptState.maybeWhen(
-                              loading: () => CircularProgressIndicator(color: Colors.white),
-                              orElse: () => Row(
+                          child: buyAttemptState.isLoading
+                              ? CircularProgressIndicator(color: Colors.white)
+                              : Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                       Icon(Icons.star,
@@ -307,7 +306,7 @@ class NoActivityAttemptsNotice extends ConsumerWidget {
                                               color: Colors.white,
                                               fontWeight: FontWeight.w700,
                                               fontSize: 18))
-                                    ])))))
+                                    ]))))
           ])
         ]));
   }
