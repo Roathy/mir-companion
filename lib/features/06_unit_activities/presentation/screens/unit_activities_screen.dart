@@ -16,7 +16,8 @@ final studentUnitsActivities = FutureProvider.autoDispose
     final authToken = ref.read(authTokenProvider);
 
     if (authToken.isEmpty) {
-      debugPrint("No auth token found");
+      // TODO: Add proper error handling
+      // debugPrint("No auth token found");
       return null;
     }
     String fullUrl =
@@ -30,7 +31,8 @@ final studentUnitsActivities = FutureProvider.autoDispose
         }));
     return response.data['data'];
   } catch (e) {
-    debugPrint("Error fetching student EGP levels's units [activities]: $e");
+    // TODO: Add proper error handling
+    // debugPrint("Error fetching student EGP levels's units [activities]: $e");
     return null;
   }
 });

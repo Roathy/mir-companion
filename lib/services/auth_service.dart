@@ -113,7 +113,6 @@ class AuthService {
     }
   }
 
-  //todo: logout
   Future<void> logoutUser() async {
     String? token = await _storage.read(key: 'auth_token');
     if (token == null || token.isEmpty) {

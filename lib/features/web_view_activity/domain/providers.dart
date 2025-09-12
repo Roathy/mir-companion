@@ -40,23 +40,27 @@ class BuyAttemptNotifier extends AsyncNotifier<BuyAttemptState> {
     errorMessage = null;
 
     try {
-      debugPrint("Starting buy attempt process for activity ID: $activityId");
+      // TODO: Add proper error handling
+      // debugPrint("Starting buy attempt process for activity ID: $activityId");
       final repository = ref.read(activityRepositoryProvider);
       final result = await repository.buyExtraAttempt(activityId);
 
       if (result.containsKey('error')) {
         errorMessage = result['error'];
-        debugPrint("Buy attempt failed: $errorMessage");
+        // TODO: Add proper error handling
+        // debugPrint("Buy attempt failed: $errorMessage");
         state = AsyncValue.error(Exception(errorMessage), StackTrace.current);
       } else {
         state = const AsyncValue.data(BuyAttemptState.success);
-        debugPrint("Buy attempt process completed successfully");
+        // TODO: Add proper error handling
+        // debugPrint("Buy attempt process completed successfully");
 
         // Invalidate the unitActivityProvider to reload the activity
         ref.invalidate(unitActivityProvider);
       }
     } catch (e) {
-      debugPrint("Unexpected buy attempt error: $e");
+      // TODO: Add proper error handling
+      // debugPrint("Unexpected buy attempt error: $e");
       errorMessage = "An unexpected error occurred. Please try again.";
       state = AsyncValue.error(Exception(errorMessage), StackTrace.current);
     }

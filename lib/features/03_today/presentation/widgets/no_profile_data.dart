@@ -12,7 +12,8 @@ class NoProfileData extends ConsumerWidget {
       await ref.read(authServiceProvider).logoutUser();
     } catch (e) {
       // Even if logout fails, we clear the local token and navigate to auth
-      debugPrint('Error logging out from server: $e');
+      // TODO: Add proper error handling
+      // debugPrint('Error logging out from server: $e');
     }
     ref.read(authTokenProvider.notifier).state = '';
     Navigator.of(context).pushAndRemoveUntil(

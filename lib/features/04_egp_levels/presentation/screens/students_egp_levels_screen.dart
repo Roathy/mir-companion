@@ -17,7 +17,8 @@ final studentEGPProvider =
     final authToken = ref.read(authTokenProvider);
 
     if (authToken.isEmpty) {
-      debugPrint("No auth token found");
+      // TODO: Add proper error handling
+      // debugPrint("No auth token found");
       return null;
     }
 
@@ -31,7 +32,8 @@ final studentEGPProvider =
         }));
     return response.data['data'];
   } catch (e) {
-    debugPrint("Error fetching student EGP levels: $e");
+    // TODO: Add proper error handling
+    // debugPrint("Error fetching student EGP levels: $e");
     return null;
   }
 });

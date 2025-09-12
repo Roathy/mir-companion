@@ -66,16 +66,15 @@ Future<LoginResult> login(WidgetRef ref, String email, String password) async {
       }
     }
   } on DioException catch (e) {
-    debugPrint('Network error: ${e.message}');
-    debugPrint('Status code: ${e.response?.statusCode}');
-    debugPrint('Response data: ${e.response?.data}');
+    // TODO: Add proper error handling
+
     // Handle error response
     final errorMessage = e.response?.data['error']['message'];
     return LoginResult(
         status: LoginStatus.failure,
         message: errorMessage ?? 'Something failed, try again later.');
   } catch (e) {
-    debugPrint("Login error: $e");
+    // TODO: Add proper error handling
     return LoginResult(status: LoginStatus.error, message: e.toString());
   }
 

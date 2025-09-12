@@ -32,11 +32,10 @@ class ActivityRepository {
             "Authorization": "Bearer $authToken",
           }));
 
-      return response.data;
+      '''      return response.data;
     } on DioException catch (e) {
-      debugPrint('Network error: ${e.message}');
-      debugPrint('Status code: ${e.response?.statusCode}');
-      debugPrint('Response data: ${e.response?.data}');
+      // TODO: Add proper error handling
+
 
       // Extract error details from the response
       final errorResponse = e.response?.data;
@@ -53,8 +52,8 @@ class ActivityRepository {
         }
       };
     } catch (e, stackTrace) {
-      debugPrint('Unexpected error: $e');
-      debugPrint('Stack trace: $stackTrace');
+      // TODO: Add proper error handling
+      // TODO: Add proper error handling
 
       return {
         'success': false,
@@ -68,8 +67,7 @@ class ActivityRepository {
 
   Future<Map<String, dynamic>> buyExtraAttempt(int activityId) async {
     try {
-      debugPrint(
-          "Attempting to buy extra attempt for activity ID: $activityId");
+      // TODO: Add proper error handling
 
       if (authToken.isEmpty) {
         return {'error': 'Authentication required. Please log in again.'};
@@ -79,8 +77,8 @@ class ActivityRepository {
           "https://api.mironline.io/api/v1/students/egp/extra-attempt";
       final requestData = {"id_actividad": activityId};
 
-      debugPrint("Sending request to: $fullUrl");
-      debugPrint("Request data: $requestData");
+      // TODO: Add proper error handling
+      // TODO: Add proper error handling
 
       final response = await dio.post(fullUrl,
           data: requestData,
@@ -90,10 +88,10 @@ class ActivityRepository {
             "Authorization": "Bearer $authToken"
           }));
 
-      debugPrint("Response received: ${response.data}");
+      // TODO: Add proper error handling
 
       if (response.data["success"] == true) {
-        debugPrint("Extra attempt purchased successfully");
+        // TODO: Add proper error handling
         return response.data; // Return actual success response
       } else {
         return {
@@ -102,7 +100,7 @@ class ActivityRepository {
         };
       }
     } on DioException catch (e) {
-      debugPrint('Network error: ${e.response?.data ?? e.message}');
+      // TODO: Add proper error handling
 
       // Extract the error message if it's structured
       if (e.response?.data is Map<String, dynamic> &&
@@ -114,8 +112,9 @@ class ActivityRepository {
 
       return {'error': 'Network issue. Please check your connection.'};
     } catch (e) {
-      debugPrint("Unexpected error: $e");
+      // TODO: Add proper error handling
       return {'error': 'Something went wrong. Please try again later.'};
     }
   }
 }
+''

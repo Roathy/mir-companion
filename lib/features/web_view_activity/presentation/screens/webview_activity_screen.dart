@@ -47,7 +47,7 @@ class WebViewActivity extends ConsumerWidget {
                     loading: () =>
                         const Center(child: CircularProgressIndicator()),
                     error: (error, stackTrace) {
-                      debugPrint("Error loading activity: $error");
+                      // TODO: Add proper error handling
 
                       String errorMessage =
                           "Something went wrong. Please try again later.";
@@ -108,7 +108,8 @@ class WebViewActivity extends ConsumerWidget {
         _handleJavaScriptMessage(message, actionHandlers);
       })
       ..setNavigationDelegate(NavigationDelegate(
-        onPageStarted: (url) => debugPrint('Page started loading: $url'),
+        onPageStarted: (url) => 
+        // TODO: Add proper error handling,
         onPageFinished: (url) {
           _injectJavaScript(controller);
         },
@@ -122,7 +123,7 @@ class WebViewActivity extends ConsumerWidget {
     JavaScriptMessage message,
     Map<String, void Function()> actionHandlers,
   ) {
-    debugPrint('Message from WebView: ${message.message}');
+    // TODO: Add proper error handling
     try {
       final Map<String, dynamic> messageData = jsonDecode(message.message);
       final String action = messageData['action'];
@@ -131,10 +132,10 @@ class WebViewActivity extends ConsumerWidget {
       if (actionHandlers.containsKey(action)) {
         actionHandlers[action]!(); // Call the handler function
       } else {
-        debugPrint('Unknown action: $action');
+        // TODO: Add proper error handling
       }
     } catch (e) {
-      debugPrint('Failed to parse message: $e');
+      // TODO: Add proper error handling
     }
   }
 
@@ -277,17 +278,14 @@ class NoActivityAttemptsNotice extends ConsumerWidget {
                               loading: () => null,
                               orElse: () => () async {
                                   if (activityId == null || activityId! <= 0) {
-                                    debugPrint(
-                                        "Invalid activity ID: $activityId");
+                                    // TODO: Add proper error handling
                                     return;
                                   }
                                   try {
-                                    debugPrint(
-                                        "Buy attempt button pressed for activity ID: $activityId");
+                                    // TODO: Add proper error handling
                                     await notifier.buyAttempt(activityId!);
                                   } catch (e) {
-                                    debugPrint(
-                                        "Error in buy attempt button: $e");
+                                    // TODO: Add proper error handling
                                   }
                                 },
                             ),
