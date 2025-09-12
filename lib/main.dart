@@ -37,7 +37,6 @@ Future<void> setRefreshRate(double rate) async {
 Future<void> main() async {
   await dotenv.load(fileName: ".env");
 
-  
   WidgetsFlutterBinding.ensureInitialized();
   setRefreshRate(60.0);
   runApp(ProviderScope(child: MyApp()));

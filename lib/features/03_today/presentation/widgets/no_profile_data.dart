@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mironline/services/auth_service.dart';
+import 'package:mironline/services/providers.dart';
 
 import '../../../02_auth/presentation/screens/auth_screen.dart';
 
@@ -9,7 +9,7 @@ class NoProfileData extends ConsumerWidget {
 
   Future<void> _logout(BuildContext context, WidgetRef ref) async {
     try {
-      await AuthService().logoutUser();
+      await ref.read(authServiceProvider).logoutUser();
     } catch (e) {
       // Even if logout fails, we clear the local token and navigate to auth
       debugPrint('Error logging out from server: $e');

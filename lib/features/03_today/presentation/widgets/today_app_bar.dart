@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mironline/services/providers.dart';
 
 import '../../../../services/auth_service.dart';
 import '../../../02_auth/presentation/screens/auth_screen.dart';
@@ -51,54 +53,56 @@ class TodayAppBar extends StatelessWidget implements PreferredSizeWidget {
                 ],
               ),
               const SizedBox(width: 4),
-              PopupMenuButton<int>(
-                onSelected: (value) async {
-                  if (value == 3) {
-                    try {
-                      await AuthService().logoutUser();
+              Consumer(builder: (context, ref, child) {
+                return PopupMenuButton<int>(
+                  onSelected: (value) async {
+                    if (value == 3) {
+                      try {
+                        await ref.read(authServiceProvider).logoutUser();
 
-                      if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Logout successful!'),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Logout successful!'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
 
-                      // Redirige al login después de un pequeño delay
-                      await Future.delayed(const Duration(milliseconds: 500));
-                      if (!context.mounted) return;
-                      Navigator.of(context).pushAndRemoveUntil(
-                        MaterialPageRoute(
-                            builder: (context) => const LoginPage()),
-                        (Route<dynamic> route) => false,
-                      );
-                    } catch (e) {
-                      if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content:
-                              Text('Error al cerrar sesión: ${e.toString()}'),
-                          backgroundColor: Colors.red,
-                          duration: const Duration(seconds: 2),
-                        ),
-                      );
+                        // Redirige al login después de un pequeño delay
+                        await Future.delayed(const Duration(milliseconds: 500));
+                        if (!context.mounted) return;
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(
+                              builder: (context) => const LoginPage()),
+                          (Route<dynamic> route) => false,
+                        );
+                      } catch (e) {
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                                'Error al cerrar sesión: ${e.toString()}'),
+                            backgroundColor: Colors.red,
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      }
                     }
-                  }
-                },
-                itemBuilder: (context) => [
-                  // _buildMenuItem(1, "Your Profile"),
-                  // _buildMenuItem(2, "Help & Support"),
-                  _buildMenuItem(3, "Logout"),
-                ],
-                child: CircleAvatar(
-                  backgroundColor: Colors.blue,
-                  child: Text(
-                    userName[0].toUpperCase(),
-                    style: const TextStyle(color: Colors.white),
+                  },
+                  itemBuilder: (context) => [
+                    // _buildMenuItem(1, "Your Profile"),
+                    // _buildMenuItem(2, "Help & Support"),
+                    _buildMenuItem(3, "Logout"),
+                  ],
+                  child: CircleAvatar(
+                    backgroundColor: Colors.blue,
+                    child: Text(
+                      userName[0].toUpperCase(),
+                      style: const TextStyle(color: Colors.white),
+                    ),
                   ),
-                ),
-              ),
+                );
+              }),
             ],
           ),
         ],

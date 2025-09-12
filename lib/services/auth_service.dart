@@ -5,11 +5,15 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:mironline/services/device-id/device_info_repository.dart';
 
 import '../../constants/api_constants.dart';
 
 class AuthService {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  final DeviceInfoRepository _deviceInfoRepository;
+
+  AuthService(this._deviceInfoRepository);
 
   String createMD5Hash() {
     DateTime now = DateTime.now();
@@ -33,6 +37,10 @@ class AuthService {
       'X-App-MirHorizon': createMD5Hash(),
     });
 
+    final String? deviceId = await _deviceInfoRepository.getAppSetId();
+    if (deviceId != null) {
+      request.fields['device_id'] = deviceId;
+    }
     request.fields['email'] = email;
     request.fields['password'] = password;
 

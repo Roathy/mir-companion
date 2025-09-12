@@ -4,6 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mironline/services/device-id/device_info_repo_impl.dart';
+import 'package:mironline/services/device-id/presentation/login_view_model.dart';
+import 'package:app_set_id/app_set_id.dart';
 
 import '../../../../core/utils/utils.dart';
 import '../../../../network/api_endpoints.dart';
@@ -33,9 +36,18 @@ Future<LoginResult> login(WidgetRef ref, String email, String password) async {
     final dio = ref.read(dioProvider);
     String fullUrl = "${ApiEndpoints.baseURL}${ApiEndpoints.studentsLogin}";
 
+    final appSetIdPlugin = AppSetId();
+    final deviceInfoRepository = DeviceInfoRepoImpl(appSetIdPlugin);
+    final loginViewModel = LoginViewModel(deviceInfoRepository);
+    final appSetId = await loginViewModel.login();
+
     Response response = await dio.post(
       fullUrl,
-      data: {"email": email, "password": password},
+      data: {
+        "email": email,
+        "password": password,
+        "device_id": appSetId,
+      },
       options: Options(headers: {
         "X-Requested-With": "XMLHttpRequest",
         "X-App-MirHorizon": createMD5Hash(),
