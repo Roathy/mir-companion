@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:mironline/services/providers.dart';
 
 import '../../../../core/utils/utils.dart';
 import '../../../../network/api_endpoints.dart';
@@ -12,7 +13,7 @@ import '../../../06_unit_activities/presentation/screens/unit_activities_screen.
 final studentLevelUnits = FutureProvider.autoDispose
     .family<Map<String, dynamic>?, String>((ref, queryParam) async {
   try {
-    final dio = ref.read(dioProvider);
+    final apiClient = ref.read(apiClientProvider);
     final authToken = ref.read(authTokenProvider);
 
     if (authToken.isEmpty) {
@@ -24,7 +25,7 @@ final studentLevelUnits = FutureProvider.autoDispose
     String fullUrl =
         "${ApiEndpoints.baseURL}${ApiEndpoints.studentsEgp}/$queryParam";
 
-    Response response = await dio.get(fullUrl,
+    Response response = await apiClient.dio.get(fullUrl,
         options: Options(headers: {
           "X-Requested-With": "XMLHttpRequest",
           "X-App-MirHorizon": createMD5Hash(),

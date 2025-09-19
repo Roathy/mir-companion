@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mironline/features/web_view_activity/presentation/screens/webview_activity_screen.dart';
+import 'package:mironline/services/providers.dart';
 
 import '../../../../core/utils/utils.dart';
 import '../../../../network/api_endpoints.dart';
@@ -18,10 +19,8 @@ import '../widgets/no_profile_data.dart';
 final studentTodayProvider =
     FutureProvider.autoDispose<Map<String, dynamic>?>((ref) async {
   try {
-    final dio = ref.read(dioProvider);
-    log('dio: $dio');
+    final apiClient = ref.read(apiClientProvider);
     final authToken = ref.read(authTokenProvider);
-    log('authToken: $authToken');
 
     if (authToken.isEmpty) {
       debugPrint("No auth token found");
@@ -29,9 +28,8 @@ final studentTodayProvider =
     }
 
     String fullUrl = "${ApiEndpoints.baseURL}${ApiEndpoints.studentsProfile}";
-    log('fullUrl: $fullUrl');
 
-    Response response = await dio.get(
+    Response response = await apiClient.dio.get(
       fullUrl,
       options: Options(headers: {
         "X-Requested-With": "XMLHttpRequest",
@@ -39,7 +37,6 @@ final studentTodayProvider =
         "Authorization": "Bearer $authToken",
       }),
     );
-    log('response: ${response.data}');
     return response.data['data'];
   } catch (e) {
     debugPrint("Error fetching student today: $e");

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:mironline/services/providers.dart';
 
 import '../../../../core/utils/utils.dart';
 import '../../../05_egp_units/presentation/screens/levels_s_units_screen.dart';
@@ -13,7 +14,7 @@ import '../widgets/code_activation_screen.dart';
 final studentEGPProvider =
     FutureProvider.autoDispose<Map<String, dynamic>?>((ref) async {
   try {
-    final dio = ref.read(dioProvider);
+    final apiClient = ref.read(apiClientProvider);
     final authToken = ref.read(authTokenProvider);
 
     if (authToken.isEmpty) {
@@ -24,7 +25,7 @@ final studentEGPProvider =
 
     String fullUrl = "${ApiEndpoints.baseURL}${ApiEndpoints.studentsEgp}";
 
-    Response response = await dio.get(fullUrl,
+    Response response = await apiClient.dio.get(fullUrl,
         options: Options(headers: {
           "X-Requested-With": "XMLHttpRequest",
           "X-App-MirHorizon": createMD5Hash(),

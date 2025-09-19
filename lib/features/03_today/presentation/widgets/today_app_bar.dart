@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mironline/services/providers.dart';
 
-import '../../../../services/auth_service.dart';
 import '../../../02_auth/presentation/screens/auth_screen.dart';
 
 class TodayAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -80,8 +79,8 @@ class TodayAppBar extends StatelessWidget implements PreferredSizeWidget {
                         if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text(
-                                'Error al cerrar sesión: ${e.toString()}'),
+                            content:
+                                Text('Error al cerrar sesión: ${e.toString()}'),
                             backgroundColor: Colors.red,
                             duration: const Duration(seconds: 2),
                           ),

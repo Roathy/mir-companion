@@ -1,10 +1,9 @@
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:crypto/crypto.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:mironline/core/utils/crypto.dart';
 import 'package:mironline/services/device-id/device_info_repository.dart';
 
 import '../../constants/api_constants.dart';
@@ -14,15 +13,6 @@ class AuthService {
   final DeviceInfoRepository _deviceInfoRepository;
 
   AuthService(this._deviceInfoRepository);
-
-  String createMD5Hash() {
-    DateTime now = DateTime.now();
-    final String day = now.day.toString().padLeft(2, '0');
-    final String month = now.month.toString().padLeft(2, '0');
-    String toHash = '${dotenv.env['SECRET_KEY']}-${now.year}$month$day';
-    log('toHash: $toHash');
-    return md5.convert(utf8.encode(toHash)).toString();
-  }
 
   Future<String?> getUserToken(String email, String password) async {
     final request = http.MultipartRequest(

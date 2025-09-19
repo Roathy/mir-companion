@@ -1,15 +1,15 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mironline/services/providers.dart';
 
 import '../../02_auth/presentation/screens/auth_screen.dart';
 import '../data/activity_repository.dart';
 
 final activityRepositoryProvider = Provider<ActivityRepository>((ref) {
-  final dio = ref.read(dioProvider);
+  final apiClient = ref.read(apiClientProvider);
   final authToken = ref.read(authTokenProvider);
-  return ActivityRepository(dio: dio, authToken: authToken);
+  return ActivityRepository(dio: apiClient.dio, authToken: authToken);
 });
 
 final unitActivityProvider = FutureProvider.autoDispose

@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:mironline/services/device-id/device_info_repo_impl.dart';
 import 'package:mironline/services/device-id/presentation/login_view_model.dart';
 import 'package:app_set_id/app_set_id.dart';
+import 'package:mironline/services/providers.dart';
 
 import '../../../../core/utils/utils.dart';
 import '../../../../network/api_endpoints.dart';
@@ -22,7 +23,6 @@ class LoginResult {
   LoginResult({required this.status, this.message});
 }
 
-final dioProvider = Provider<Dio>((ref) => Dio());
 final authTokenProvider = StateProvider<String>((ref) => "");
 
 Future<LoginResult> login(WidgetRef ref, String email, String password) async {
@@ -33,7 +33,7 @@ Future<LoginResult> login(WidgetRef ref, String email, String password) async {
   }
 
   try {
-    final dio = ref.read(dioProvider);
+    final apiClient = ref.read(apiClientProvider);
     String fullUrl = "${ApiEndpoints.baseURL}${ApiEndpoints.studentsLogin}";
 
     final appSetIdPlugin = AppSetId();
@@ -41,7 +41,7 @@ Future<LoginResult> login(WidgetRef ref, String email, String password) async {
     final loginViewModel = LoginViewModel(deviceInfoRepository);
     final appSetId = await loginViewModel.login();
 
-    Response response = await dio.post(
+    Response response = await apiClient.dio.post(
       fullUrl,
       data: {
         "email": email,

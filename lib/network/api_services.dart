@@ -1,39 +1,29 @@
-import 'package:dio/dio.dart';
-
-import 'api_client.dart';
+import 'package:mironline/network/api_client.dart';
 
 class ApiService {
-  final DioClient dioClient;
+  final ApiClient apiClient;
 
-  ApiService(this.dioClient);
+  ApiService(this.apiClient);
 
-  Future<Response> login(String email, String password, String md5Hash) async {
-    final String fullUrl = '/login'; // Your login endpoint
+  Future<String?> login(String email, String password) async {
 
-    return await dioClient.dio.post(
-      fullUrl,
-      data: {"email": email, "password": password},
-      options: Options(
-        headers: {
-          "X-Requested-With": "XMLHttpRequest",
-          "X-App-MirHorizon": md5Hash,
-        },
-      ),
-    );
+    if(email.isEmpty || password.isEmpty){
+      return null;
+    }
+
   }
+}
 
-  Future<Response> fetchStudentProfile(String authToken, String md5Hash) async {
-    final String fullUrl = '/profile'; // Your profile endpoint
+sealed class Result<S, F> {
+  const Result();
+}
 
-    return await dioClient.dio.get(
-      fullUrl,
-      options: Options(
-        headers: {
-          "X-Requested-With": "XMLHttpRequest",
-          "X-App-MirHorizon": md5Hash,
-          "Authorization": "Bearer $authToken", // Token authorization
-        },
-      ),
-    );
-  }
+final class Success<S, F> extends Result<S, F>{
+  const Success(this.value);
+  final S value;
+}
+
+final class Failure<S, F> extends Result<S, F>{
+  const Failure(this.value);
+  final F value;
 }
