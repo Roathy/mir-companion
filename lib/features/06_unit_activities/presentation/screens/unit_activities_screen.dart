@@ -248,7 +248,7 @@ class CollapsedAppbar extends StatelessWidget {
       Flexible(
           flex: 5,
           child: Text(
-            'UNIT ${data['id_unidad']}: ${data['unidad']}'.toUpperCase(),
+            'UNIT ${data['int_unidad']}: ${data['unidad']}'.toUpperCase(),
             style: const TextStyle(
               color: Colors.white,
               fontSize: 16,

@@ -26,6 +26,10 @@ class WebViewActivity extends ConsumerWidget {
         ref.invalidate(studentUnitsActivities);
         Navigator.pop(context);
       },
+      'refreshButtonClick': () {
+        ref.invalidate(studentUnitsActivities);
+        Navigator.pop(context);
+      },
     };
 
     return PopScope(
@@ -97,11 +101,11 @@ class WebViewActivity extends ConsumerWidget {
     final activityUrl = Uri.decodeFull(
         activityData['data']['actividad']['_links']['self']['href']);
 
-    // Initialize the controller first
-    final controller = WebViewController();
+    // Initialize the controller
+    final _controller = WebViewController();
 
     // Configure the controller
-    controller
+    _controller
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..addJavaScriptChannel('FlutterApp', onMessageReceived: (message) {
         _handleJavaScriptMessage(message, actionHandlers);
@@ -109,12 +113,12 @@ class WebViewActivity extends ConsumerWidget {
       ..setNavigationDelegate(NavigationDelegate(
         onPageStarted: (url) => debugPrint('Page started loading: $url'),
         onPageFinished: (url) {
-          _injectJavaScript(controller);
+          _injectJavaScript(_controller);
         },
       ))
       ..loadRequest(Uri.parse(activityUrl));
 
-    return WebViewWidget(controller: controller);
+    return WebViewWidget(controller: _controller);
   }
 
   void _handleJavaScriptMessage(
@@ -146,6 +150,8 @@ class WebViewActivity extends ConsumerWidget {
             'action': 'finishButtonClick',
             'timestamp': new Date().getTime()
           }));
+        } else if(status == 'refreshApp') {
+
         }
       }, 500);
     ''');
@@ -189,7 +195,7 @@ class NoActivityAttemptsNotice extends ConsumerWidget {
     final notifier = ref.read(buyAttemptNotifierProvider.notifier);
 
     // Watch the unitActivityProvider to trigger a reload when invalidated
-    ref.watch(unitActivityProvider('your_activity_query_here'));
+    // ref.watch(unitActivityProvider('your_activity_query_here'));
 
     ref.listen(buyAttemptNotifierProvider, (previous, next) {
       if (!context.mounted) return;
