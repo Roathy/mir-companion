@@ -27,7 +27,7 @@ class _CodeActivationScreenState extends State<CodeActivationScreen> {
             child: Stack(children: [
               // Semi-transparent overlay overlay that covers the entire screen
               Positioned.fill(
-                  child: Container(color: Colors.black.withOpacity(0.3))),
+                  child: Container(color: Colors.black.withValues(alpha: 0.3))),
               Container(
                   height: MediaQuery.of(context).size.height * 0.72,
                   margin:
@@ -37,7 +37,7 @@ class _CodeActivationScreenState extends State<CodeActivationScreen> {
                     borderRadius: BorderRadius.circular(16),
                     // boxShadow: [
                     //   BoxShadow(
-                    //       color: Colors.black.withOpacity(0.3),
+                    //       color: Colors.black.withValues(alpha: 0.3),
                     //       blurRadius: 10,
                     //       offset: const Offset(0, 4))
                     // ],

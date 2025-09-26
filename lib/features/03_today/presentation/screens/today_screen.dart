@@ -179,13 +179,32 @@ class LastActivityDetails extends StatelessWidget {
             child: ListView(primary: false, shrinkWrap: true, children: [
               Text(
                 'Continue with ${egp['titulo']}',
-                style: const TextStyle(fontSize: 18, color: Colors.white),
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.white,
+                  shadows: [
+                    Shadow(
+                      blurRadius: 3.0, // Qué tan difuminada será la sombra
+                      color:
+                          Colors.black.withValues(alpha: 1), // Color y opacidad
+                      offset: Offset(2.0, 2.0), // Desplazamiento en X y Y
+                    ),
+                  ],
+                ),
               ),
               Text(
                 'on ${egp['nivel']} - Unit ${egp['int_unidad']}',
-                style: const TextStyle(
+                style: TextStyle(
                     fontSize: 18,
                     color: Colors.white,
+                    shadows: [
+                      Shadow(
+                        blurRadius: 3.0, // Qué tan difuminada será la sombra
+                        color: Colors.black
+                            .withValues(alpha: 1), // Color y opacidad
+                        offset: Offset(2.0, 2.0), // Desplazamiento en X y Y
+                      ),
+                    ],
                     fontWeight: FontWeight.bold),
               )
             ])));

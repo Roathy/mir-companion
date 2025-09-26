@@ -7,73 +7,108 @@ import '../../../../core/utils/format_buy_msg.dart';
 import '../../../06_unit_activities/presentation/screens/unit_activities_screen.dart';
 import '../../domain/providers.dart';
 
-class WebViewActivity extends ConsumerWidget {
+// PASO 1: Convertido a ConsumerStatefulWidget
+class WebViewActivity extends ConsumerStatefulWidget {
   final String activityQuery;
   const WebViewActivity({super.key, required this.activityQuery});
 
+  @override
+  ConsumerState<WebViewActivity> createState() => _WebViewActivityState();
+}
+
+// PASO 2: Toda la lógica ahora vive en la clase State
+class _WebViewActivityState extends ConsumerState<WebViewActivity> {
   static const Map<String, String> specialCases = {
     'out-of-tries-30': 'Use 30 mircoins to purchase an extra attempt',
     'out-of-tries-50': 'Use 50 mircoins to purchase an extra attempt',
   };
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final asyncActivity = ref.watch(unitActivityProvider(activityQuery));
+  // PASO 3: El controller se declara aquí y se inicializa en initState
+  late final WebViewController _webViewCtrl;
 
-    // Define action handlers for JavaScript communication
-    final Map<String, void Function()> actionHandlers = {
-      'finishButtonClick': () {
-        ref.invalidate(studentUnitsActivities);
+  @override
+  void initState() {
+    super.initState();
+    // Se inicializa una SOLA VEZ
+    _webViewCtrl = WebViewController();
+  }
+
+  // PASO 4: Centralizamos la lógica de salida
+  void _exitActivity() {
+    debugPrint("--- _exitActivity FUE LLAMADA ---");
+
+    // 1. Invalida el estado como antes. Esta acción es síncrona y rápida.
+    ref.invalidate(studentUnitsActivities);
+
+    // 2. Programa la navegación para que ocurra después de que el frame actual se complete.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // 3. La comprobación 'mounted' es extra importante aquí,
+      // ya que esto se ejecuta un poco más tarde.
+      if (mounted) {
+        debugPrint("--- Ejecutando Navigator.pop DESPUÉS del frame ---");
         Navigator.pop(context);
-      },
-      'refreshButtonClick': () {
-        ref.invalidate(studentUnitsActivities);
-        Navigator.pop(context);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Usamos widget.activityQuery para acceder a los parámetros del widget
+    final asyncActivity = ref.watch(unitActivityProvider(widget.activityQuery));
+
+    final Map<String, void Function(WidgetRef)> actionHandlers = {
+      // Ahora llaman a la función centralizada
+      'finishButtonClick': (_) => _exitActivity(),
+      // 2. 'retryButtonClick' ahora tiene su propia lógica específica.
+      'retryButtonClick': (ref) {
+        debugPrint(
+            'Acción de reintento: invalidando el provider de la actividad...');
+        // Invalida el provider para forzar una nueva llamada a la API y recargar los datos.
+        // La UI se reconstruirá automáticamente gracias a ref.watch().
+        ref.invalidate(unitActivityProvider(widget.activityQuery));
       },
     };
 
     return PopScope(
-        canPop: false,
-        onPopInvoked: (bool didPop) async {
-          if (didPop) return;
-          final bool shouldExit = await _showExitConfirmationDialog(context);
-          if (shouldExit) {
-            ref.invalidate(studentUnitsActivities);
-            Navigator.pop(context);
-          }
-        },
-        child: Scaffold(
-            body: SafeArea(
-                child: asyncActivity.when(
-                    data: (activityData) =>
-                        _buildActivityUI(ref, activityData, actionHandlers),
-                    loading: () =>
-                        const Center(child: CircularProgressIndicator()),
-                    error: (error, stackTrace) {
-                      debugPrint("Error loading activity: $error");
-
-                      String errorMessage =
-                          "Something went wrong. Please try again later.";
-
-                      if (error is Exception) {
-                        final extractedMessage = (error as dynamic).message;
-                        if (extractedMessage is Map<String, dynamic> &&
-                            extractedMessage.containsKey('message')) {
-                          errorMessage = extractedMessage['message'];
-                        }
-                      }
-
-                      return NoActivityAttemptsNotice(
-                        canBuy: false,
-                        message: errorMessage,
-                      );
-                    }))));
+      canPop: false,
+      onPopInvoked: (bool didPop) async {
+        if (didPop) return;
+        final bool shouldExit = await _showExitConfirmationDialog(context);
+        if (shouldExit) {
+          _exitActivity();
+        }
+      },
+      child: Scaffold(
+        body: SafeArea(
+          child: asyncActivity.when(
+            data: (activityData) =>
+                _buildActivityUI(activityData, actionHandlers),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stackTrace) {
+              debugPrint("Error loading activity: $error");
+              String errorMessage =
+                  "Something went wrong. Please try again later.";
+              if (error is Exception) {
+                final extractedMessage = (error as dynamic).message;
+                if (extractedMessage is Map<String, dynamic> &&
+                    extractedMessage.containsKey('message')) {
+                  errorMessage = extractedMessage['message'];
+                }
+              }
+              return NoActivityAttemptsNotice(
+                canBuy: false,
+                message: errorMessage,
+              );
+            },
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildActivityUI(
-    WidgetRef ref,
     Map<String, dynamic>? activityData,
-    Map<String, void Function()> actionHandlers,
+    Map<String, void Function(WidgetRef)> actionHandlers,
   ) {
     if (activityData == null) {
       return Center(child: Text('Oops! This activity is empty!'));
@@ -81,8 +116,8 @@ class WebViewActivity extends ConsumerWidget {
     if (activityData.containsKey("error")) {
       return NoActivityAttemptsNotice(canBuy: false);
     }
-    if (activityData['message'] == specialCases['out-of-tries-30'] ||
-        activityData['message'] == specialCases['out-of-tries-50']) {
+    // MEJORA: Verificación más limpia y escalable.
+    if (specialCases.values.contains(activityData['message'])) {
       final activityId = activityData['data']['id_actividad'];
       return NoActivityAttemptsNotice(
         activityId: activityId,
@@ -90,56 +125,61 @@ class WebViewActivity extends ConsumerWidget {
         message: activityData['message'],
       );
     } else {
+      // necesita pasar actionHandlers
       return _buildWebView(activityData, actionHandlers);
     }
   }
 
   Widget _buildWebView(
     Map<String, dynamic> activityData,
-    Map<String, void Function()> actionHandlers,
+    Map<String, void Function(WidgetRef)> actionHandlers,
   ) {
     final activityUrl = Uri.decodeFull(
         activityData['data']['actividad']['_links']['self']['href']);
 
-    // Initialize the controller
-    final _controller = WebViewController();
-
-    // Configure the controller
-    _controller
+    // El controller ya solo lo configuramos.
+    _webViewCtrl
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..addJavaScriptChannel('FlutterApp', onMessageReceived: (message) {
-        _handleJavaScriptMessage(message, actionHandlers);
-      })
+      ..addJavaScriptChannel(
+        'MironlineChannel',
+        onMessageReceived: (javaScriptMsg) {
+          // Ahora 'ref' está disponible en todo el State, por lo que la llamada es válida.
+          _handleJavaScriptMsg(javaScriptMsg, actionHandlers);
+        },
+      )
       ..setNavigationDelegate(NavigationDelegate(
         onPageStarted: (url) => debugPrint('Page started loading: $url'),
         onPageFinished: (url) {
-          _injectJavaScript(_controller);
+          // Usamos el controller de la clase State
+          _injectJavaScript(_webViewCtrl);
         },
       ))
       ..loadRequest(Uri.parse(activityUrl));
 
-    return WebViewWidget(controller: _controller);
+    return WebViewWidget(controller: _webViewCtrl);
   }
 
-  void _handleJavaScriptMessage(
-    JavaScriptMessage message,
-    Map<String, void Function()> actionHandlers,
+  // Ahora no necesita 'ref' como parámetro, porque ya es parte del State.
+  void _handleJavaScriptMsg(
+    JavaScriptMessage javaScriptMsg,
+    Map<String, void Function(WidgetRef)> actionHandlers,
   ) {
-    debugPrint('Message from WebView: ${message.message}');
     try {
-      final Map<String, dynamic> messageData = jsonDecode(message.message);
+      final Map<String, dynamic> messageData =
+          jsonDecode(javaScriptMsg.message);
       final String action = messageData['action'];
-
-      // Execute the handler for the given action
       if (actionHandlers.containsKey(action)) {
-        actionHandlers[action]!(); // Call the handler function
+        // Le pasamos el 'ref' del State.
+        actionHandlers[action]!(ref);
       } else {
         debugPrint('Unknown action: $action');
       }
     } catch (e) {
-      debugPrint('Failed to parse message: $e');
+      debugPrint('Error al procesar el mensaje de WebView: $e');
     }
   }
+
+// Dentro de tu clase _WebViewActivityState
 
   void _injectJavaScript(WebViewController controller) {
     controller.runJavaScript('''
@@ -150,31 +190,58 @@ class WebViewActivity extends ConsumerWidget {
             'action': 'finishButtonClick',
             'timestamp': new Date().getTime()
           }));
-        } else if(status == 'refreshApp') {
-
-        }
+        } 
       }, 500);
-    ''');
-  }
+    // --- Lógica para el botón FINISH
+    // Buscamos el botón de reintentar por su ID 'finish'.
+    const finishButton = document.getElementById('finish');
+    
+    // Si el botón existe, le añadimos un "escuchador" para el evento 'click'.
+    if (finishButton) {
+      finishButton.addEventListener('click', function() {
+        // Cuando se hace clic, enviamos el mensaje para salir.
+        MironlineChannel.postMessage(JSON.stringify({
+          'action': 'finishButtonClick',
+          'details': 'El usuario hizo clic en el botón de finish.'
+        }));
+      });
+    }
 
-  Future<bool> _showExitConfirmationDialog(BuildContext context) async {
-    return await showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Are you sure?', textAlign: TextAlign.center),
-            content: const Text('Do you want to exit the Activity?'),
-            actions: [
-              TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text('No')),
-              TextButton(
-                  onPressed: () => Navigator.of(context).pop(true),
-                  child: const Text('Yes')),
-            ],
-          ),
-        ) ??
-        false;
+    // --- Lógica para el botón REINTENTAR (la nueva implementación) ---
+    // Buscamos el botón de reintentar por su ID 'retry'.
+    const retryButton = document.getElementById('retry');
+    
+    // Si el botón existe, le añadimos un "escuchador" para el evento 'click'.
+    if (retryButton) {
+      retryButton.addEventListener('click', function() {
+        // Cuando se hace clic, enviamos el mensaje para reintentar.
+        MironlineChannel.postMessage(JSON.stringify({
+          'action': 'retryButtonClick',
+          'details': 'El usuario hizo clic en el botón de reintentar.'
+        }));
+      });
+    }
+  ''');
   }
+}
+
+Future<bool> _showExitConfirmationDialog(BuildContext context) async {
+  return await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Are you sure?', textAlign: TextAlign.center),
+          content: const Text('Do you want to exit the Activity?'),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('No')),
+            TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Yes')),
+          ],
+        ),
+      ) ??
+      false;
 }
 
 class NoActivityAttemptsNotice extends ConsumerWidget {
@@ -193,9 +260,6 @@ class NoActivityAttemptsNotice extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final buyAttemptState = ref.watch(buyAttemptNotifierProvider);
     final notifier = ref.read(buyAttemptNotifierProvider.notifier);
-
-    // Watch the unitActivityProvider to trigger a reload when invalidated
-    // ref.watch(unitActivityProvider('your_activity_query_here'));
 
     ref.listen(buyAttemptNotifierProvider, (previous, next) {
       if (!context.mounted) return;

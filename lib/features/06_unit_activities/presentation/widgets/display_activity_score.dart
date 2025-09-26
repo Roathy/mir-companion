@@ -39,7 +39,7 @@ class DisplayActivityScore extends StatelessWidget {
             child: Icon(
               shadows: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
+                  color: Colors.black.withValues(alpha: 0.3),
                   blurRadius: 5, // Larger shadow
                   offset: const Offset(2, 2), // Bottom-right orientation
                 )

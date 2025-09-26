@@ -126,7 +126,7 @@ class UnitActivitiesScreen extends ConsumerWidget {
                                               borderRadius:
                                                   BorderRadius.circular(16),
                                               color: Colors.black
-                                                  .withOpacity(0.7)),
+                                                  .withValues(alpha: 0.7)),
                                           child: const Icon(Icons.lock,
                                               size: 90, color: Colors.white)))
                             ]),
@@ -179,7 +179,8 @@ class ActivityCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(9), // Rounded corners
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.3), // Shadow color
+                      color:
+                          Colors.black.withValues(alpha: 0.7), // Shadow color
                       blurRadius: 6, // Spread of the shadow
                       spreadRadius: 1, // Extends the shadow
                       offset: Offset(0, 3), // Slight bottom shadow

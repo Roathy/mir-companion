@@ -14,9 +14,9 @@ class TextActivityTitle extends StatelessWidget {
         style: TextStyle(
           shadows: [
             Shadow(
-              color: Colors.black.withOpacity(0.8), // Shadow color
-              offset: Offset(2, 2), // Shadow offset (x, y)
-              blurRadius: 9, // Shadow blur radius
+              color: Colors.black.withValues(alpha: 1), // Shadow color
+              offset: Offset(1.8, 1.8), // Shadow offset (x, y)
+              blurRadius: 3, // Shadow blur radius
             )
           ],
           color: Colors.white,

@@ -17,9 +17,9 @@ class TextActivityType extends StatelessWidget {
             fontSize: 18,
             shadows: [
               Shadow(
-                  color: Colors.black.withOpacity(0.8),
-                  offset: Offset(1, 1),
-                  blurRadius: 9.0)
+                  color: Colors.black.withValues(alpha: 1),
+                  offset: Offset(1.5, 1.5),
+                  blurRadius: 3.0)
             ]));
   }
 }
