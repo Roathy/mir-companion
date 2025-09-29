@@ -28,7 +28,6 @@ class ActivityRepository {
           options: Options(headers: {
             "X-Requested-With": "XMLHttpRequest",
             "X-App-MirHorizon": createMD5Hash(),
-            // "X-App-MirHorizon-NoCache": 1,
             "Authorization": "Bearer $authToken",
           }));
 
@@ -78,9 +77,6 @@ class ActivityRepository {
       String fullUrl =
           "https://api.mironline.io/api/v1/students/egp/extra-attempt";
       final requestData = {"id_actividad": activityId};
-
-      debugPrint("Sending request to: $fullUrl");
-      debugPrint("Request data: $requestData");
 
       final response = await dio.post(fullUrl,
           data: requestData,

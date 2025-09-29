@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -30,7 +28,6 @@ class AnimatedSplashScreenState extends ConsumerState<AnimatedSplashScreen>
         () {
           hasSessionFuture.then(
             (token) {
-              inspect(token);
               if (mounted) {
                 // Guard with mounted
                 if (token != null && token.isNotEmpty) {
@@ -55,7 +52,8 @@ class AnimatedSplashScreenState extends ConsumerState<AnimatedSplashScreen>
       }
       return authToken;
     } catch (e) {
-      inspect(e);
+      debugPrint('animated splash screen');
+      // inspect(e);
       return null;
     }
   }

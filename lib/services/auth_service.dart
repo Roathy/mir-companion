@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:mironline/core/utils/crypto.dart';
@@ -36,7 +37,6 @@ class AuthService {
 
     try {
       final response = await http.Response.fromStream(await request.send());
-      inspect(response);
       if (response.statusCode == 200) {
         final Map<String, dynamic> decodedResponse = json.decode(response.body);
         await Future.delayed(const Duration(milliseconds: 120));
@@ -117,19 +117,13 @@ class AuthService {
     };
 
     final url = Uri.parse('https://api.mironline.io/api/v1/students/logout');
-    log('Attempting logout with GET to $url');
-    log('Headers: $headers');
-
     try {
       // Usando el método GET, como lo especifica la documentación
       final response = await http.get(url, headers: headers);
 
       if (response.statusCode == 200) {
-        log('Logout successful: ${response.body}');
         await _storage.delete(key: 'auth_token');
       } else {
-        log('Logout failed with status: ${response.statusCode}');
-        log('Response body: ${response.body}');
         throw Exception('Logout failed. Status code: ${response.statusCode}');
       }
     } catch (e) {

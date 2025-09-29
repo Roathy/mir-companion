@@ -94,8 +94,8 @@ class LevelsSUnitsScreen extends ConsumerWidget {
                                               elevation: 1,
                                               borderRadius:
                                                   BorderRadius.circular(16),
-                                              shadowColor:
-                                                  Colors.black.withValues(alpha: 0.3),
+                                              shadowColor: Colors.black
+                                                  .withValues(alpha: 0.3),
                                               child: Container(
                                                 decoration: BoxDecoration(
                                                     borderRadius:
@@ -125,7 +125,8 @@ class LevelsSUnitsScreen extends ConsumerWidget {
                                                           BorderRadius.circular(
                                                               16),
                                                       color: Colors.black
-                                                          .withValues(alpha: 0.7)),
+                                                          .withValues(
+                                                              alpha: 0.7)),
                                                   child: const Icon(Icons.lock,
                                                       size: 90,
                                                       color: Colors.white)))

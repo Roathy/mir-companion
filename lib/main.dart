@@ -24,12 +24,6 @@ Future<void> setRefreshRate(double rate) async {
   }
 }
 
-// void main() async {
-//   WidgetsFlutterBinding.ensureInitialized();
-//   setRefreshRate(60.0);
-//   runApp(ProviderScope(child: MyApp()));
-// }
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -78,28 +72,6 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    // if (Platform.isIOS) {
-    //   return CupertinoApp(
-    //     localizationsDelegates: const [
-    //       DefaultMaterialLocalizations.delegate,
-    //       DefaultCupertinoLocalizations.delegate,
-    //       DefaultWidgetsLocalizations.delegate,
-    //     ],
-    //     debugShowCheckedModeBanner: false,
-    //     title: 'mironline',
-    //     theme: const CupertinoThemeData(
-    //       primaryColor: CupertinoColors.activeBlue,
-    //     ),
-    //     routes: {
-    //       '/': (context) => AnimatedSplashScreen(goHome: goHome),
-    //       '/welcome': (context) => WelcomeTourPage(),
-    //       '/login': (context) => LoginPage(),
-    //       '/home': (context) => StudentTodayScreen(),
-    //       '/egp-levels': (context) => StudentsEgpLevelsScreen(),
-    //       '/unit-activities': (context) => UnitActivitiesScreen(),
-    //     },
-    //   );
-    // } else {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'mironline',

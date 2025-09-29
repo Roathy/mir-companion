@@ -167,7 +167,7 @@ class _WebViewActivityState extends ConsumerState<WebViewActivity> {
       final AndroidWebViewController androidController =
           _webViewCtrl.platform as AndroidWebViewController;
 
-      // Android: Deshabilitar el efecto elástico (Overscroll)
+      // Android: habilitar el efecto elástico (Overscroll)
       androidController.setOverScrollMode(
         WebViewOverScrollMode.always,
       );
@@ -217,6 +217,17 @@ class _WebViewActivityState extends ConsumerState<WebViewActivity> {
    const finishButton = document.getElementById('finish');
     if (finishButton) {
       finishButton.addEventListener('click', function() {
+        MironlineChannel.postMessage(JSON.stringify({
+          'action': 'finishButtonClick',
+          'details': 'El usuario hizo clic en el botón de finish.'
+        }));
+      });
+    }
+
+    // Buscamos el botón de exit to menu y si existe añadimos evento
+   const finishExtraButton = document.getElementById('finish-extra-attempts');
+    if (finishExtraButton) {
+      finishExtraButton.addEventListener('click', function() {
         MironlineChannel.postMessage(JSON.stringify({
           'action': 'finishButtonClick',
           'details': 'El usuario hizo clic en el botón de finish.'

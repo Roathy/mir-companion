@@ -15,7 +15,6 @@ final studentUnitsActivities = FutureProvider.autoDispose
   try {
     final apiClient = ref.read(apiClientProvider);
     final authToken = ref.read(authTokenProvider);
-
     if (authToken.isEmpty) {
       // TODO: Add proper error handling
       // debugPrint("No auth token found");

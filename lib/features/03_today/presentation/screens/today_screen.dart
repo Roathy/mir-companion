@@ -61,7 +61,6 @@ class _StudentTodayScreenState extends ConsumerState<StudentTodayScreen> {
           if (profileData == null) {
             return const NoProfileData();
           } else {
-            log('profileData: $profileData');
             final alumno = profileData['alumno'];
             final egp = profileData['actividades_siguientes']['egp'];
             final String activityBgImgUrl = egp['cover_actividad'];
@@ -199,7 +198,6 @@ class LastActivityDetails extends StatelessWidget {
                     color: Colors.white,
                     shadows: [
                       Shadow(
-                        
                         blurRadius: 1.0, // Qué tan difuminada será la sombra
                         color: Colors.black
                             .withValues(alpha: 1), // Color y opacidad
