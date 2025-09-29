@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter_android/webview_flutter_android.dart';
 import '../../../../core/utils/format_buy_msg.dart';
 import '../../../06_unit_activities/presentation/screens/unit_activities_screen.dart';
 import '../../domain/providers.dart';
@@ -152,11 +153,28 @@ class _WebViewActivityState extends ConsumerState<WebViewActivity> {
         onPageFinished: (url) {
           // Usamos el controller de la clase State
           _injectJavaScript(_webViewCtrl);
+          _applyPlatformScrollSettings();
         },
       ))
       ..loadRequest(Uri.parse(activityUrl));
 
     return WebViewWidget(controller: _webViewCtrl);
+  }
+
+  void _applyPlatformScrollSettings() {
+    // Lógica condicional para acceder y configurar la API de plataforma
+    if (_webViewCtrl.platform is AndroidWebViewController) {
+      final AndroidWebViewController androidController =
+          _webViewCtrl.platform as AndroidWebViewController;
+
+      // Android: Deshabilitar el efecto elástico (Overscroll)
+      androidController.setOverScrollMode(
+        WebViewOverScrollMode.always,
+      );
+
+      // Opcional: Deshabilitar la barra de desplazamiento vertical si se desea una apariencia más limpia
+      androidController.setVerticalScrollBarEnabled(false);
+    }
   }
 
   // Ahora no necesita 'ref' como parámetro, porque ya es parte del State.
@@ -183,11 +201,9 @@ class _WebViewActivityState extends ConsumerState<WebViewActivity> {
 
   void _injectJavaScript(WebViewController controller) {
     controller.runJavaScript('''
-    // --- Lógica para el botón CLOSE
-    // Buscamos el botón de close 
-    const closeButton = document.querySelector('.navbar-fixed-top .salir');
-    
-    // Si el botón existe, le añadimos un "escuchador" para el evento 'click'.
+    // --- Lógica para el botón CLOSE y FINISH ---
+    // Buscamos el botón de close y si existe añadimos evento
+    const closeButton = document.querySelector('.navbar-fixed-top .salir');    
     if (closeButton) {
       closeButton.addEventListener('click', function() {
         MironlineChannel.postMessage(JSON.stringify({
@@ -197,7 +213,8 @@ class _WebViewActivityState extends ConsumerState<WebViewActivity> {
       });
     }
 
-    // Si el botón existe, le añadimos un "escuchador" para el evento 'click'.
+    // Buscamos el botón de finish y si existe añadimos evento
+   const finishButton = document.getElementById('finish');
     if (finishButton) {
       finishButton.addEventListener('click', function() {
         MironlineChannel.postMessage(JSON.stringify({
@@ -210,7 +227,6 @@ class _WebViewActivityState extends ConsumerState<WebViewActivity> {
     // --- Lógica para el botón REINTENTAR (la nueva implementación) ---
     // Buscamos el botón de reintentar por su ID 'retry'.
     const retryButton = document.getElementById('retry');
-    
     // Si el botón existe, le añadimos un "escuchador" para el evento 'click'.
     if (retryButton) {
       retryButton.addEventListener('click', function() {

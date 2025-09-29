@@ -184,10 +184,10 @@ class LastActivityDetails extends StatelessWidget {
                   color: Colors.white,
                   shadows: [
                     Shadow(
-                      blurRadius: 3.0, // Qué tan difuminada será la sombra
+                      blurRadius: 1.0, // Qué tan difuminada será la sombra
                       color:
                           Colors.black.withValues(alpha: 1), // Color y opacidad
-                      offset: Offset(2.0, 2.0), // Desplazamiento en X y Y
+                      offset: Offset(1.5, 1.5), // Desplazamiento en X y Y
                     ),
                   ],
                 ),
@@ -199,10 +199,11 @@ class LastActivityDetails extends StatelessWidget {
                     color: Colors.white,
                     shadows: [
                       Shadow(
-                        blurRadius: 3.0, // Qué tan difuminada será la sombra
+                        
+                        blurRadius: 1.0, // Qué tan difuminada será la sombra
                         color: Colors.black
                             .withValues(alpha: 1), // Color y opacidad
-                        offset: Offset(2.0, 2.0), // Desplazamiento en X y Y
+                        offset: Offset(1.5, 1.5), // Desplazamiento en X y Y
                       ),
                     ],
                     fontWeight: FontWeight.bold),

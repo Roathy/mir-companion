@@ -2,7 +2,7 @@ name: mironline
 description: "Pocket version for make it real and mironline language learning resources!"
 publish_to: 'none' 
 
-version: 1.0.0+8
+version: 1.0.2+1
 
 environment:
   sdk: ^3.5.3
@@ -30,6 +30,7 @@ dependencies:
   flutter_dotenv: ^6.0.0
   http: ^1.5.0
   app_set_id: ^1.3.0
+  webview_flutter_android: ^4.10.2
 
 
 dev_dependencies:
