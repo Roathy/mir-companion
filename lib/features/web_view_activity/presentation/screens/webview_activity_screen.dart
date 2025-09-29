@@ -183,23 +183,23 @@ class _WebViewActivityState extends ConsumerState<WebViewActivity> {
 
   void _injectJavaScript(WebViewController controller) {
     controller.runJavaScript('''
-      setTimeout(function(){
-        var status = window['checkStatus']();
-        if(status == 'closeApp'){
-          FlutterApp.postMessage(JSON.stringify({
-            'action': 'finishButtonClick',
-            'timestamp': new Date().getTime()
-          }));
-        } 
-      }, 500);
-    // --- Lógica para el botón FINISH
-    // Buscamos el botón de reintentar por su ID 'finish'.
-    const finishButton = document.getElementById('finish');
+    // --- Lógica para el botón CLOSE
+    // Buscamos el botón de close 
+    const closeButton = document.querySelector('.navbar-fixed-top .salir');
     
+    // Si el botón existe, le añadimos un "escuchador" para el evento 'click'.
+    if (closeButton) {
+      closeButton.addEventListener('click', function() {
+        MironlineChannel.postMessage(JSON.stringify({
+          'action': 'finishButtonClick',
+          'details': 'El usuario hizo clic en el botón de close.'
+        }));
+      });
+    }
+
     // Si el botón existe, le añadimos un "escuchador" para el evento 'click'.
     if (finishButton) {
       finishButton.addEventListener('click', function() {
-        // Cuando se hace clic, enviamos el mensaje para salir.
         MironlineChannel.postMessage(JSON.stringify({
           'action': 'finishButtonClick',
           'details': 'El usuario hizo clic en el botón de finish.'
@@ -214,7 +214,6 @@ class _WebViewActivityState extends ConsumerState<WebViewActivity> {
     // Si el botón existe, le añadimos un "escuchador" para el evento 'click'.
     if (retryButton) {
       retryButton.addEventListener('click', function() {
-        // Cuando se hace clic, enviamos el mensaje para reintentar.
         MironlineChannel.postMessage(JSON.stringify({
           'action': 'retryButtonClick',
           'details': 'El usuario hizo clic en el botón de reintentar.'
