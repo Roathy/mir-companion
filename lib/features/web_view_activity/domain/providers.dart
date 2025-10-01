@@ -18,6 +18,11 @@ final unitActivityProvider = FutureProvider.autoDispose
   final data = await repository.fetchUnitActivity(activityQuery);
 
   if (data.containsKey('error')) {
+    if (data['error'] is Map &&
+        data['error']['message'] ==
+            'You have reached the maximum number of attempts for the exercise, please return to the main menu and continue with the next activity') {
+      return data;
+    }
     throw Exception(
         data['error']); // Ensure the error message is shown properly
   }

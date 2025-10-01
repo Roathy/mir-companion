@@ -33,6 +33,15 @@ class ActivityRepository {
 
       return response.data;
     } on DioException catch (e) {
+      if (e.response?.statusCode == 403) {
+        final errorResponse = e.response?.data;
+        if (errorResponse is Map<String, dynamic> &&
+            errorResponse.containsKey('error') &&
+            errorResponse['error']['message'] ==
+                'You have reached the maximum number of attempts for the exercise, please return to the main menu and continue with the next activity') {
+          return errorResponse;
+        }
+      }
       debugPrint('Network error: ${e.message}');
       debugPrint('Status code: ${e.response?.statusCode}');
       debugPrint('Response data: ${e.response?.data}');
