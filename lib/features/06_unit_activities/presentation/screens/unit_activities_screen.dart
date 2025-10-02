@@ -16,9 +16,7 @@ final studentUnitsActivities = FutureProvider.autoDispose
     final apiClient = ref.read(apiClientProvider);
     final authToken = ref.read(authTokenProvider);
     if (authToken.isEmpty) {
-      // TODO: Add proper error handling
-      // debugPrint("No auth token found");
-      return null;
+      throw Exception('No auth token found');
     }
     String fullUrl =
         "${ApiEndpoints.baseURL}${ApiEndpoints.studentsEgp}/$queryParam";
@@ -29,11 +27,15 @@ final studentUnitsActivities = FutureProvider.autoDispose
           "X-App-MirHorizon": createMD5Hash(),
           "Authorization": "Bearer $authToken",
         }));
+
+    if (response.data['estatus'] == 0) {
+      throw Exception(response.data['mensaje']);
+    }
+
     return response.data['data'];
   } catch (e) {
-    // TODO: Add proper error handling
-    // debugPrint("Error fetching student EGP levels's units [activities]: $e");
-    return null;
+    // rethrow the error to be caught by the UI
+    rethrow;
   }
 });
 
@@ -147,7 +149,19 @@ class UnitActivitiesScreen extends ConsumerWidget {
               body: SafeArea(child: Center(child: CircularProgressIndicator())),
             ),
         error: (error, stackTrace) => Scaffold(
-              body: SafeArea(child: Center(child: Text(error.toString()))),
+              body: SafeArea(
+                  child: Center(
+                      child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                    Text(error.toString()),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () =>
+                          ref.invalidate(studentUnitsActivities(queryParam)),
+                      child: Center(child: const Text('Retry')),
+                    )
+                  ]))),
             ));
   }
 }

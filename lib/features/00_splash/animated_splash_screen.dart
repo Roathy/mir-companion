@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import 'package:mironline/services/providers.dart';
 import '../02_auth/presentation/screens/auth_screen.dart';
 
 class AnimatedSplashScreen extends ConsumerStatefulWidget {
@@ -20,27 +21,36 @@ class AnimatedSplashScreenState extends ConsumerState<AnimatedSplashScreen>
   void initState() {
     super.initState();
 
-    final Future<String?> hasSessionFuture = getLastSession();
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
-    )..forward().whenComplete(
-        () {
-          hasSessionFuture.then(
-            (token) {
-              if (mounted) {
-                // Guard with mounted
-                if (token != null && token.isNotEmpty) {
-                  ref.read(authTokenProvider.notifier).state = token;
-                  Navigator.pushReplacementNamed(context, '/home');
-                } else {
-                  Navigator.pushReplacementNamed(context, '/login');
-                }
-              }
-            },
-          );
-        },
-      );
+    )..forward().whenComplete(() {
+        _validateAndNavigate();
+      });
+  }
+
+  Future<void> _validateAndNavigate() async {
+    final authService = ref.read(authServiceProvider);
+    try {
+      final token = await getLastSession();
+      if (token != null && token.isNotEmpty) {
+        ref.read(authTokenProvider.notifier).state = token;
+        // Validate the token by fetching user data
+        await authService.userLogin();
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/home');
+        }
+      } else {
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/login');
+        }
+      }
+    } catch (e) {
+      // If token validation fails, go to login
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/login');
+      }
+    }
   }
 
   Future<String?> getLastSession() async {
