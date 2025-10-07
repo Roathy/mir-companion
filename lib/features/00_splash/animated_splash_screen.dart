@@ -30,18 +30,23 @@ class AnimatedSplashScreenState extends ConsumerState<AnimatedSplashScreen>
 
   Future<void> _validateAndNavigate() async {
     final authService = ref.read(authServiceProvider);
-    debugPrint('Starting token validation...');
     try {
+      debugPrint('Getting session token...');
       final token = await getLastSession();
-      debugPrint('Retrieved token: $token');
-
       if (token != null && token.isNotEmpty) {
+        debugPrint('Token found, checking validity...');
         ref.read(authTokenProvider.notifier).state = token;
-        debugPrint('Token found, attempting to log in...');
-        await authService.userLogin();
-        debugPrint('Token validation successful, navigating to home.');
-        if (mounted) {
-          Navigator.pushReplacementNamed(context, '/home');
+        final bool isTokenValid = await authService.isTokenValid();
+        if (isTokenValid) {
+          debugPrint('Token is valid, navigating to home.');
+          if (mounted) {
+            Navigator.pushReplacementNamed(context, '/home');
+          }
+        } else {
+          debugPrint('Token is invalid, navigating to login.');
+          if (mounted) {
+            Navigator.pushReplacementNamed(context, '/login');
+          }
         }
       } else {
         debugPrint('No token found, navigating to login.');
@@ -50,7 +55,7 @@ class AnimatedSplashScreenState extends ConsumerState<AnimatedSplashScreen>
         }
       }
     } catch (e) {
-      debugPrint('Token validation failed: $e');
+      debugPrint('Error during token validation: $e');
       // If token validation fails, go to login
       if (mounted) {
         Navigator.pushReplacementNamed(context, '/login');

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:mironline/core/utils/crypto.dart';
@@ -96,6 +97,36 @@ class AuthService {
       }
     } catch (e) {
       throw Exception('Failed to authenticate. Error: $e');
+    }
+  }
+
+  Future<bool> isTokenValid() async {
+    debugPrint('Checking token validity...');
+    String? token = await _storage.read(key: 'auth_token');
+    if (token == null || token.isEmpty) {
+      debugPrint('No token found.');
+      return false;
+    }
+    debugPrint('Token: $token');
+
+    final headers = {
+      'Authorization': 'Bearer $token',
+      'X-Requested-With': 'XMLHttpRequest',
+      'X-App-MirHorizon': createMD5Hash(),
+    };
+
+    final url = Uri.parse(ApiConstants.checkAlive);
+    debugPrint('Calling check-alive endpoint: $url');
+
+    try {
+      final response = await http.get(url, headers: headers);
+      debugPrint('check-alive response status code: ${response.statusCode}');
+      final bool isValid = response.statusCode == 200;
+      debugPrint('Token is valid: $isValid');
+      return isValid;
+    } catch (e) {
+      debugPrint('Error calling check-alive endpoint: $e');
+      return false;
     }
   }
 
