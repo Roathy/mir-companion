@@ -33,7 +33,7 @@ class ActivityRepository {
 
       return response.data;
     } on DioException catch (e) {
-      if (e.response?.statusCode == 403) {
+      if (e.response?.statusCode == 403 || e.response?.statusCode == 401) {
         final errorResponse = e.response?.data;
         if (errorResponse is Map<String, dynamic> &&
             errorResponse.containsKey('error') &&

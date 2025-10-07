@@ -8,6 +8,7 @@ import 'package:mironline/services/device-id/device_info_repo_impl.dart';
 import 'package:mironline/services/device-id/presentation/login_view_model.dart';
 import 'package:app_set_id/app_set_id.dart';
 import 'package:mironline/services/providers.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/utils/utils.dart';
 import '../../../../network/api_endpoints.dart';
@@ -94,6 +95,40 @@ class LoginPageState extends ConsumerState<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  // --- NEW: STATE AND INITIALIZATION LOGIC ---
+  bool _rememberMe = false;
+  final _storage = const FlutterSecureStorage();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCredentials();
+  }
+
+  /// Loads credentials from secure storage if they exist.
+  Future<void> _loadCredentials() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final String? email = prefs.getString('email');
+
+      if (email != null && email.isNotEmpty) {
+        final String? password = await _storage.read(key: 'password');
+        if (mounted) {
+          setState(() {
+            _emailController.text = email;
+            _passwordController.text = password ?? '';
+            _rememberMe = true;
+          });
+        }
+      }
+    } catch (e) {
+      // It's better not to show an error to the user for this,
+      // but logging it helps during development.
+      debugPrint("Failed to load credentials: $e");
+    }
+  }
+  // --- END OF NEW LOGIC ---
+
   void _handleLogin() async {
     LoginResult result = await login(
       ref,
@@ -101,10 +136,24 @@ class LoginPageState extends ConsumerState<LoginPage> {
       _passwordController.text.trim(),
     );
 
-    if (!mounted) return; // Check if the widget is still in the tree.
+    if (!mounted) return;
 
     if (result.status == LoginStatus.success) {
-      // Show success message and navigate
+      // --- NEW: SAVE/CLEAR LOGIC ADDED HERE ---
+      // This is the only addition within this method.
+      // It runs only after a successful login and before navigation.
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      if (_rememberMe) {
+        await prefs.setString('email', _emailController.text.trim());
+        await _storage.write(
+            key: 'password', value: _passwordController.text.trim());
+      } else {
+        await prefs.remove('email');
+        await _storage.delete(key: 'password');
+      }
+      // --- END OF ADDITION ---
+
+      // YOUR ORIGINAL SUCCESS AND NAVIGATION LOGIC IS PRESERVED AND UNTOUCHED
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
             content: Text("Login successful! Redirecting..."),
@@ -120,7 +169,6 @@ class LoginPageState extends ConsumerState<LoginPage> {
         }
       });
     } else {
-      // Show failure message from the server in the SnackBar
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
             content: Text(result.message ?? "Login failed."),
@@ -152,7 +200,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
                       child: Padding(
                           padding: const EdgeInsets.symmetric(
                               vertical: 20, horizontal: 16),
-                          child: Column(spacing: 12, children: [
+                          child: Column(spacing: 12,children: [
                             Text(
                               "Student Login",
                               style: GoogleFonts.poppins(
@@ -164,21 +212,20 @@ class LoginPageState extends ConsumerState<LoginPage> {
                             GoogleLoginButton(),
                             OrDivider(),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.mail_outline,
-                                    color: Colors.blue[900]),
-                                const SizedBox(width: 6),
-                                Text(
-                                  "Login with e-mail",
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 15,
-                                    color: Colors.blue[900],
-                                    fontWeight: FontWeight.w400,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.mail_outline,
+                                      color: Colors.blue[900]),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    "Login with e-mail",
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 15,
+                                      color: Colors.blue[900],
+                                      fontWeight: FontWeight.w400,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
+                                ]),
                             Card(
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(6),
@@ -199,6 +246,24 @@ class LoginPageState extends ConsumerState<LoginPage> {
                                         label: "Your password",
                                         obscureText: true,
                                       ),
+
+                                      // --- NEW: CHECKBOX WIDGET INSERTED HERE ---
+                                      // Placed between the password field and the login button.
+                                      CheckboxListTile(
+                                        title: const Text("Remember Me"),
+                                        value: _rememberMe,
+                                        onChanged: (newValue) {
+                                          setState(() {
+                                            _rememberMe = newValue ?? false;
+                                          });
+                                        },
+                                        controlAffinity:
+                                            ListTileControlAffinity.leading,
+                                        contentPadding: EdgeInsets.zero,
+                                        dense: true,
+                                      ),
+                                      // --- END OF ADDITION ---
+
                                       LoginButton(handleLogin: _handleLogin),
                                     ])))
                           ])))

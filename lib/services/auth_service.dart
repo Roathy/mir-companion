@@ -1,7 +1,5 @@
 import 'dart:convert';
-import 'dart:developer';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:mironline/core/utils/crypto.dart';
@@ -65,24 +63,22 @@ class AuthService {
   }
 
   Future<Map<String, dynamic>> userLogin() async {
-    final request = http.MultipartRequest(
-      'POST',
-      Uri.parse(ApiConstants.userFetchURL),
-    );
-
     String? token = await _storage.read(key: 'auth_token');
     if (token == null || token.isEmpty) {
       throw Exception('No token found. Please login again.');
     }
 
-    request.headers.addAll({
+    final headers = {
       'X-Requested-With': 'XMLHttpRequest',
       'X-App-MirHorizon': createMD5Hash(),
       'Authorization': 'Bearer $token',
-    });
+    };
+
+    final url = Uri.parse(ApiConstants.userFetchURL);
 
     try {
-      final response = await http.Response.fromStream(await request.send());
+      final response = await http.get(url, headers: headers);
+
       if (response.statusCode == 200) {
         final Map<String, dynamic> decodedResponse = json.decode(response.body);
 
@@ -92,14 +88,14 @@ class AuthService {
           return userData;
         } else {
           throw Exception(
-              'Failed to authenticate. "message" key not found in response.');
+              'Failed to authenticate. "data" key not found in response.');
         }
       } else {
         throw Exception(
             'Failed to authenticate. Status code: ${response.statusCode}');
       }
     } catch (e) {
-      throw Exception('failed to authenticate. Error $e');
+      throw Exception('Failed to authenticate. Error: $e');
     }
   }
 

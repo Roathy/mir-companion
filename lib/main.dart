@@ -66,7 +66,6 @@ class _MyAppState extends State<MyApp> {
       }
     } catch (e, stackTrace) {
       // TODO: Add proper error handling
-      // TODO: Add proper error handling
     }
   }
 
@@ -80,7 +79,7 @@ class _MyAppState extends State<MyApp> {
         useMaterial3: true,
       ),
       routes: {
-        '/': (context) => AnimatedSplashScreen(goHome: goHome),
+        '/': (context) => AnimatedSplashScreen(),
         '/welcome': (context) => WelcomeTourPage(),
         '/login': (context) => LoginPage(),
         '/home': (context) => StudentTodayScreen(),

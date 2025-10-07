@@ -6,8 +6,7 @@ import 'package:mironline/services/providers.dart';
 import '../02_auth/presentation/screens/auth_screen.dart';
 
 class AnimatedSplashScreen extends ConsumerStatefulWidget {
-  final bool goHome;
-  const AnimatedSplashScreen({required this.goHome, super.key});
+  const AnimatedSplashScreen({super.key});
 
   @override
   AnimatedSplashScreenState createState() => AnimatedSplashScreenState();
@@ -31,21 +30,27 @@ class AnimatedSplashScreenState extends ConsumerState<AnimatedSplashScreen>
 
   Future<void> _validateAndNavigate() async {
     final authService = ref.read(authServiceProvider);
+    debugPrint('Starting token validation...');
     try {
       final token = await getLastSession();
+      debugPrint('Retrieved token: $token');
+
       if (token != null && token.isNotEmpty) {
         ref.read(authTokenProvider.notifier).state = token;
-        // Validate the token by fetching user data
+        debugPrint('Token found, attempting to log in...');
         await authService.userLogin();
+        debugPrint('Token validation successful, navigating to home.');
         if (mounted) {
           Navigator.pushReplacementNamed(context, '/home');
         }
       } else {
+        debugPrint('No token found, navigating to login.');
         if (mounted) {
           Navigator.pushReplacementNamed(context, '/login');
         }
       }
     } catch (e) {
+      debugPrint('Token validation failed: $e');
       // If token validation fails, go to login
       if (mounted) {
         Navigator.pushReplacementNamed(context, '/login');
