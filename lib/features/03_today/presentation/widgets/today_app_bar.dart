@@ -35,7 +35,9 @@ class TodayAppBar extends StatelessWidget implements PreferredSizeWidget {
             children: [
               IconButton(
                 icon: const Icon(Icons.groups, color: Colors.grey),
-                onPressed: null,
+                onPressed: () {
+                  Navigator.pushNamed(context, '/join-group');
+                },
               ),
               Row(
                 children: [
