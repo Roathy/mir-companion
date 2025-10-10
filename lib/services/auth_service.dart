@@ -8,6 +8,11 @@ import 'package:mironline/services/device-id/device_info_repository.dart';
 
 import '../../constants/api_constants.dart';
 
+class NotEnrolledInGroupException implements Exception {
+  final String message;
+  NotEnrolledInGroupException(this.message);
+}
+
 class AuthService {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   final DeviceInfoRepository _deviceInfoRepository;
@@ -155,6 +160,111 @@ class AuthService {
       }
     } catch (e) {
       throw Exception('Logout error: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> joinGroup(String code) async {
+    String? token = await _storage.read(key: 'auth_token');
+    if (token == null || token.isEmpty) {
+      throw Exception('No token found. Please login again.');
+    }
+
+    final headers = {
+      'Content-Type': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest',
+      'X-App-MirHorizon': createMD5Hash(),
+      'Authorization': 'Bearer $token',
+    };
+
+    final url = Uri.parse(ApiConstants.groupEnroll);
+    final body = json.encode({'code': code});
+
+    try {
+      final response = await http.post(url, headers: headers, body: body);
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> decodedResponse = json.decode(response.body);
+        return decodedResponse;
+      } else {
+        throw Exception(
+            'Failed to join group. Status code: ${response.statusCode}, Body: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Failed to join group. Error: $e');
+    }
+  }
+
+  Future<void> leaveGroup() async {
+    String? token = await _storage.read(key: 'auth_token');
+    if (token == null || token.isEmpty) {
+      throw Exception('No token found. Please login again.');
+    }
+
+    final headers = {
+      'Content-Type': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest',
+      'X-App-MirHorizon': createMD5Hash(),
+      'Authorization': 'Bearer $token',
+    };
+
+    final url = Uri.parse(ApiConstants.groupUnenroll);
+
+    try {
+      final response = await http.post(url, headers: headers);
+
+      if (response.statusCode != 200) {
+        throw Exception(
+            'Failed to leave group. Status code: ${response.statusCode}, Body: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Failed to leave group. Error: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchGroup() async {
+    debugPrint('Fetching group...');
+    String? token = await _storage.read(key: 'auth_token');
+    if (token == null || token.isEmpty) {
+      debugPrint('No token found');
+      throw Exception('No token found. Please login again.');
+    }
+    debugPrint('Token: $token');
+
+    final headers = {
+      'X-Requested-With': 'XMLHttpRequest',
+      'X-App-MirHorizon': createMD5Hash(),
+      'Authorization': 'Bearer $token',
+    };
+
+    final url = Uri.parse(ApiConstants.group);
+    debugPrint('Calling group endpoint: $url');
+
+    try {
+      final response = await http.get(url, headers: headers);
+      debugPrint('Group response status code: ${response.statusCode}');
+      debugPrint('Group response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> decodedResponse = json.decode(response.body);
+        debugPrint('Successfully fetched group');
+        return decodedResponse;
+      } else if (response.statusCode == 400) {
+        final Map<String, dynamic> decodedResponse = json.decode(response.body);
+        if (decodedResponse.containsKey('error') &&
+            decodedResponse['error']['message'] ==
+                'You are not currently enrolled in a group') {
+          debugPrint('User not enrolled in a group');
+          throw NotEnrolledInGroupException(decodedResponse['error']['message']);
+        }
+      }
+      debugPrint('Failed to fetch group with status code: ${response.statusCode}');
+      throw Exception('Failed to fetch group. Status code: ${response.statusCode}');
+    } catch (e) {
+      if (e is NotEnrolledInGroupException) {
+        rethrow;
+      }
+      debugPrint('Error fetching group: $e');
+      throw Exception('Failed to fetch group. Error: $e');
     }
   }
 }
