@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mironline/features/06_unit_activities/presentation/widgets/export_unit_activities_widgets.dart';
+import 'package:mironline/services/refresh_provider.dart';
 import 'package:mironline/services/providers.dart';
 
 import '../../../../core/utils/utils.dart';
@@ -12,6 +13,7 @@ import '../../../web_view_activity/presentation/screens/webview_activity_screen.
 
 final studentUnitsActivities = FutureProvider.autoDispose
     .family<Map<String, dynamic>?, String>((ref, queryParam) async {
+  ref.watch(activitiesRefreshProvider);
   try {
     final apiClient = ref.read(apiClientProvider);
     final authToken = ref.read(authTokenProvider);

@@ -42,9 +42,6 @@ class ActivityRepository {
           return errorResponse;
         }
       }
-      debugPrint('Network error: ${e.message}');
-      debugPrint('Status code: ${e.response?.statusCode}');
-      debugPrint('Response data: ${e.response?.data}');
 
       // Extract error details from the response
       final errorResponse = e.response?.data;
@@ -61,9 +58,6 @@ class ActivityRepository {
         }
       };
     } catch (e, stackTrace) {
-      debugPrint('Unexpected error: $e');
-      debugPrint('Stack trace: $stackTrace');
-
       return {
         'success': false,
         'error': {
@@ -76,9 +70,6 @@ class ActivityRepository {
 
   Future<Map<String, dynamic>> buyExtraAttempt(int activityId) async {
     try {
-      debugPrint(
-          "Attempting to buy extra attempt for activity ID: $activityId");
-
       if (authToken.isEmpty) {
         return {'error': 'Authentication required. Please log in again.'};
       }
@@ -95,10 +86,7 @@ class ActivityRepository {
             "Authorization": "Bearer $authToken"
           }));
 
-      debugPrint("Response received: ${response.data}");
-
       if (response.data["success"] == true) {
-        debugPrint("Extra attempt purchased successfully");
         return response.data; // Return actual success response
       } else {
         return {
@@ -107,8 +95,6 @@ class ActivityRepository {
         };
       }
     } on DioException catch (e) {
-      debugPrint('Network error: ${e.response?.data ?? e.message}');
-
       // Extract the error message if it's structured
       if (e.response?.data is Map<String, dynamic> &&
           e.response?.data.containsKey('error')) {
@@ -119,7 +105,6 @@ class ActivityRepository {
 
       return {'error': 'Network issue. Please check your connection.'};
     } catch (e) {
-      debugPrint("Unexpected error: $e");
       return {'error': 'Something went wrong. Please try again later.'};
     }
   }

@@ -42,8 +42,6 @@ class _WebViewActivityState extends ConsumerState<WebViewActivity> {
 
   // PASO 4: Centralizamos la lógica de salida
   void _exitActivity() {
-    debugPrint("--- _exitActivity FUE LLAMADA ---");
-
     // 1. Invalida el estado como antes. Esta acción es síncrona y rápida.
     ref.invalidate(studentUnitsActivities);
 
@@ -52,7 +50,6 @@ class _WebViewActivityState extends ConsumerState<WebViewActivity> {
       // 3. La comprobación 'mounted' es extra importante aquí,
       // ya que esto se ejecuta un poco más tarde.
       if (mounted) {
-        debugPrint("--- Ejecutando Navigator.pop DESPUÉS del frame ---");
         Navigator.pop(context);
       }
     });
@@ -68,8 +65,6 @@ class _WebViewActivityState extends ConsumerState<WebViewActivity> {
       'finishButtonClick': (_) => _exitActivity(),
       // 2. 'retryButtonClick' ahora tiene su propia lógica específica.
       'retryButtonClick': (ref) {
-        debugPrint(
-            'Acción de reintento: invalidando el provider de la actividad...');
         // Invalida el provider para forzar una nueva llamada a la API y recargar los datos.
         // La UI se reconstruirá automáticamente gracias a ref.watch().
         ref.invalidate(unitActivityProvider(widget.activityQuery));
@@ -92,7 +87,6 @@ class _WebViewActivityState extends ConsumerState<WebViewActivity> {
                 _buildActivityUI(activityData, actionHandlers),
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, stackTrace) {
-              debugPrint("Error loading activity: $error");
               String errorMessage =
                   "Something went wrong. Please try again later.";
               if (error is Exception) {
@@ -117,16 +111,10 @@ class _WebViewActivityState extends ConsumerState<WebViewActivity> {
     Map<String, dynamic>? activityData,
     Map<String, void Function(WidgetRef)> actionHandlers,
   ) {
-    debugPrint("--- _buildActivityUI --- DATA: $activityData");
-
     if (activityData == null) {
-      debugPrint(
-          "--- _buildActivityUI --- activityData is null, showing empty activity message.");
       return Center(child: Text('Oops! This activity is empty!'));
     }
     if (activityData.containsKey("error")) {
-      debugPrint(
-          "--- _buildActivityUI --- activityData contains error, showing NoActivityAttemptsNotice.");
       return NoActivityAttemptsNotice(canBuy: false);
     }
 
@@ -134,8 +122,6 @@ class _WebViewActivityState extends ConsumerState<WebViewActivity> {
     if (message != null &&
         (specialCases.keys.contains(message) ||
             specialCases.values.contains(message))) {
-      debugPrint(
-          "--- _buildActivityUI --- specialCases matched, showing NoActivityAttemptsNotice with canBuy: true.");
       final activityId = activityData['data']['id_actividad'];
       return NoActivityAttemptsNotice(
         activityId: activityId,
@@ -146,12 +132,8 @@ class _WebViewActivityState extends ConsumerState<WebViewActivity> {
 
     if (activityData['data']?['actividad']?['_links']?['self']?['href'] !=
         null) {
-      debugPrint(
-          "--- _buildActivityUI --- Activity URL found, proceeding to _buildWebView.");
       return _buildWebView(activityData, actionHandlers);
     } else {
-      debugPrint(
-          "--- _buildActivityUI --- No activity URL found, showing error notice.");
       final errorMessage =
           message ?? 'An unexpected error occurred.';
       return NoActivityAttemptsNotice(canBuy: false, message: errorMessage);
@@ -176,7 +158,7 @@ class _WebViewActivityState extends ConsumerState<WebViewActivity> {
         },
       )
       ..setNavigationDelegate(NavigationDelegate(
-        onPageStarted: (url) => debugPrint('Page started loading: $url'),
+        onPageStarted: (url) {},
         onPageFinished: (url) {
           // Usamos el controller de la clase State
           _injectJavaScript(_webViewCtrl);
@@ -217,10 +199,8 @@ class _WebViewActivityState extends ConsumerState<WebViewActivity> {
         // Le pasamos el 'ref' del State.
         actionHandlers[action]!(ref);
       } else {
-        debugPrint('Unknown action: $action');
       }
     } catch (e) {
-      debugPrint('Error al procesar el mensaje de WebView: $e');
     }
   }
 
@@ -398,17 +378,11 @@ class NoActivityAttemptsNotice extends ConsumerWidget {
                               ? null
                               : () async {
                                   if (activityId == null || activityId! <= 0) {
-                                    debugPrint(
-                                        "Invalid activity ID: $activityId");
                                     return;
                                   }
                                   try {
-                                    debugPrint(
-                                        "Buy attempt button pressed for activity ID: $activityId");
                                     await notifier.buyAttempt(activityId!);
                                   } catch (e) {
-                                    debugPrint(
-                                        "Error in buy attempt button: $e");
                                   }
                                 },
                           style: ButtonStyle(

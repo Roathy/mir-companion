@@ -106,13 +106,10 @@ class AuthService {
   }
 
   Future<bool> isTokenValid() async {
-    debugPrint('Checking token validity...');
     String? token = await _storage.read(key: 'auth_token');
     if (token == null || token.isEmpty) {
-      debugPrint('No token found.');
       return false;
     }
-    debugPrint('Token: $token');
 
     final headers = {
       'Authorization': 'Bearer $token',
@@ -121,16 +118,12 @@ class AuthService {
     };
 
     final url = Uri.parse(ApiConstants.checkAlive);
-    debugPrint('Calling check-alive endpoint: $url');
 
     try {
       final response = await http.get(url, headers: headers);
-      debugPrint('check-alive response status code: ${response.statusCode}');
       final bool isValid = response.statusCode == 200;
-      debugPrint('Token is valid: $isValid');
       return isValid;
     } catch (e) {
-      debugPrint('Error calling check-alive endpoint: $e');
       return false;
     }
   }
@@ -253,13 +246,10 @@ class AuthService {
   }
 
   Future<Map<String, dynamic>> fetchGroup() async {
-    debugPrint('Fetching group...');
     String? token = await _storage.read(key: 'auth_token');
     if (token == null || token.isEmpty) {
-      debugPrint('No token found');
       throw Exception('No token found. Please login again.');
     }
-    debugPrint('Token: $token');
 
     final headers = {
       'X-Requested-With': 'XMLHttpRequest',
@@ -268,33 +258,26 @@ class AuthService {
     };
 
     final url = Uri.parse(ApiConstants.group);
-    debugPrint('Calling group endpoint: $url');
 
     try {
       final response = await http.get(url, headers: headers);
-      debugPrint('Group response status code: ${response.statusCode}');
-      debugPrint('Group response body: ${response.body}');
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> decodedResponse = json.decode(response.body);
-        debugPrint('Successfully fetched group');
         return decodedResponse;
       } else if (response.statusCode == 400) {
         final Map<String, dynamic> decodedResponse = json.decode(response.body);
         if (decodedResponse.containsKey('error') &&
             decodedResponse['error']['message'] ==
                 'You are not currently enrolled in a group') {
-          debugPrint('User not enrolled in a group');
           throw NotEnrolledInGroupException(decodedResponse['error']['message']);
         }
       }
-      debugPrint('Failed to fetch group with status code: ${response.statusCode}');
       throw Exception('Failed to fetch group. Status code: ${response.statusCode}');
     } catch (e) {
       if (e is NotEnrolledInGroupException) {
         rethrow;
       }
-      debugPrint('Error fetching group: $e');
       throw Exception('Failed to fetch group. Error: $e');
     }
   }

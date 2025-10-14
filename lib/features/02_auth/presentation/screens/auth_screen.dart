@@ -124,7 +124,6 @@ class LoginPageState extends ConsumerState<LoginPage> {
     } catch (e) {
       // It's better not to show an error to the user for this,
       // but logging it helps during development.
-      debugPrint("Failed to load credentials: $e");
     }
   }
   // --- END OF NEW LOGIC ---

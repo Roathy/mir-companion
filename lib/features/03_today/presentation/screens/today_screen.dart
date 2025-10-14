@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mironline/features/web_view_activity/presentation/screens/webview_activity_screen.dart';
+import 'package:mironline/services/refresh_provider.dart';
 import 'package:mironline/services/providers.dart';
 
 import '../../../../core/utils/utils.dart';
@@ -18,12 +19,12 @@ import '../widgets/no_profile_data.dart';
 
 final studentTodayProvider =
     FutureProvider.autoDispose<Map<String, dynamic>?>((ref) async {
+  ref.watch(activitiesRefreshProvider);
   try {
     final apiClient = ref.read(apiClientProvider);
     final authToken = ref.read(authTokenProvider);
 
     if (authToken.isEmpty) {
-      debugPrint("No auth token found");
       return null;
     }
 
@@ -39,7 +40,6 @@ final studentTodayProvider =
     );
     return response.data['data'];
   } catch (e) {
-    debugPrint("Error fetching student today: $e");
     return null;
   }
 });

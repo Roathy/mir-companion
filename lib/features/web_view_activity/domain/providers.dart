@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mironline/services/refresh_provider.dart';
 import 'package:mironline/services/providers.dart';
 
 import '../../02_auth/presentation/screens/auth_screen.dart';
@@ -62,6 +63,7 @@ class BuyAttemptNotifier extends AsyncNotifier<BuyAttemptState> {
 
         // Invalidate the unitActivityProvider to reload the activity
         ref.invalidate(unitActivityProvider);
+        ref.read(activitiesRefreshProvider.notifier).state++;
       }
     } catch (e) {
       // TODO: Add proper error handling

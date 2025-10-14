@@ -31,31 +31,25 @@ class AnimatedSplashScreenState extends ConsumerState<AnimatedSplashScreen>
   Future<void> _validateAndNavigate() async {
     final authService = ref.read(authServiceProvider);
     try {
-      debugPrint('Getting session token...');
       final token = await getLastSession();
       if (token != null && token.isNotEmpty) {
-        debugPrint('Token found, checking validity...');
         ref.read(authTokenProvider.notifier).state = token;
         final bool isTokenValid = await authService.isTokenValid();
         if (isTokenValid) {
-          debugPrint('Token is valid, navigating to home.');
           if (mounted) {
             Navigator.pushReplacementNamed(context, '/home');
           }
         } else {
-          debugPrint('Token is invalid, navigating to login.');
           if (mounted) {
             Navigator.pushReplacementNamed(context, '/login');
           }
         }
       } else {
-        debugPrint('No token found, navigating to login.');
         if (mounted) {
           Navigator.pushReplacementNamed(context, '/login');
         }
       }
     } catch (e) {
-      debugPrint('Error during token validation: $e');
       // If token validation fails, go to login
       if (mounted) {
         Navigator.pushReplacementNamed(context, '/login');
@@ -72,7 +66,6 @@ class AnimatedSplashScreenState extends ConsumerState<AnimatedSplashScreen>
       }
       return authToken;
     } catch (e) {
-      debugPrint('animated splash screen');
       // inspect(e);
       return null;
     }
