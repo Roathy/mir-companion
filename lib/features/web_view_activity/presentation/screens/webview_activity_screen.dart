@@ -117,23 +117,44 @@ class _WebViewActivityState extends ConsumerState<WebViewActivity> {
     Map<String, dynamic>? activityData,
     Map<String, void Function(WidgetRef)> actionHandlers,
   ) {
+    debugPrint("--- _buildActivityUI --- DATA: $activityData");
+
     if (activityData == null) {
+      debugPrint(
+          "--- _buildActivityUI --- activityData is null, showing empty activity message.");
       return Center(child: Text('Oops! This activity is empty!'));
     }
     if (activityData.containsKey("error")) {
+      debugPrint(
+          "--- _buildActivityUI --- activityData contains error, showing NoActivityAttemptsNotice.");
       return NoActivityAttemptsNotice(canBuy: false);
     }
-    // MEJORA: Verificación más limpia y escalable.
-    if (specialCases.keys.contains(activityData['message'])) {
+
+    final message = activityData['message'] as String?;
+    if (message != null &&
+        (specialCases.keys.contains(message) ||
+            specialCases.values.contains(message))) {
+      debugPrint(
+          "--- _buildActivityUI --- specialCases matched, showing NoActivityAttemptsNotice with canBuy: true.");
       final activityId = activityData['data']['id_actividad'];
       return NoActivityAttemptsNotice(
         activityId: activityId,
         canBuy: true,
-        message: activityData['message'],
+        message: message,
       );
-    } else {
-      // necesita pasar actionHandlers
+    }
+
+    if (activityData['data']?['actividad']?['_links']?['self']?['href'] !=
+        null) {
+      debugPrint(
+          "--- _buildActivityUI --- Activity URL found, proceeding to _buildWebView.");
       return _buildWebView(activityData, actionHandlers);
+    } else {
+      debugPrint(
+          "--- _buildActivityUI --- No activity URL found, showing error notice.");
+      final errorMessage =
+          message ?? 'An unexpected error occurred.';
+      return NoActivityAttemptsNotice(canBuy: false, message: errorMessage);
     }
   }
 
