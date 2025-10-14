@@ -124,7 +124,7 @@ class _WebViewActivityState extends ConsumerState<WebViewActivity> {
       return NoActivityAttemptsNotice(canBuy: false);
     }
     // MEJORA: Verificación más limpia y escalable.
-    if (specialCases.values.contains(activityData['message'])) {
+    if (specialCases.keys.contains(activityData['message'])) {
       final activityId = activityData['data']['id_actividad'];
       return NoActivityAttemptsNotice(
         activityId: activityId,
