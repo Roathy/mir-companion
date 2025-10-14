@@ -194,6 +194,37 @@ class AuthService {
     }
   }
 
+  Future<Map<String, dynamic>> unlockLevel(String code) async {
+    String? token = await _storage.read(key: 'auth_token');
+    if (token == null || token.isEmpty) {
+      throw Exception('No token found. Please login again.');
+    }
+
+    final headers = {
+      'Content-Type': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest',
+      'X-App-MirHorizon': createMD5Hash(),
+      'Authorization': 'Bearer $token',
+    };
+
+    final url = Uri.parse(ApiConstants.activateCode);
+    final body = json.encode({'code': code});
+
+    try {
+      final response = await http.post(url, headers: headers, body: body);
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> decodedResponse = json.decode(response.body);
+        return decodedResponse;
+      } else {
+        throw Exception(
+            'Failed to unlock level. Status code: ${response.statusCode}, Body: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Failed to unlock level. Error: $e');
+    }
+  }
+
   Future<void> leaveGroup() async {
     String? token = await _storage.read(key: 'auth_token');
     if (token == null || token.isEmpty) {

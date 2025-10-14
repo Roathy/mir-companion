@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'package:dio/dio.dart';
@@ -136,37 +138,7 @@ class _StudentsEgpLevelsScreenState
   }
 }
 
-void _handleLevelTap(BuildContext context, bool isLevelActive,
-    Map<String, dynamic> currentLevel) {
-  if (isLevelActive) {
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => LevelsSUnitsScreen(
-                  queryParam: currentLevel['nivel_tag'],
-                )));
-  } else {
-    Navigator.push(
-        context,
-        PageRouteBuilder(
-            opaque: false,
-            barrierColor: Colors.transparent,
-            pageBuilder: (context, animation, secondaryAnimation) =>
-                CodeActivationScreen(),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
-              return SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(0.0, 1.0),
-                  end: Offset.zero,
-                ).animate(animation),
-                child: child,
-              );
-            }));
-  }
-}
-
-class LevelDetailsCard extends StatelessWidget {
+class LevelDetailsCard extends ConsumerStatefulWidget {
   const LevelDetailsCard(
       {super.key, required this.isLevelActive, required this.currentLevel});
 
@@ -174,14 +146,99 @@ class LevelDetailsCard extends StatelessWidget {
   final dynamic currentLevel;
 
   @override
+  ConsumerState<LevelDetailsCard> createState() => _LevelDetailsCardState();
+}
+
+class _LevelDetailsCardState extends ConsumerState<LevelDetailsCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+  late Timer _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+
+    _animation = TweenSequence<double>([
+      TweenSequenceItem<double>(
+          tween: Tween<double>(begin: 0.0, end: 0.05), weight: 1),
+      TweenSequenceItem<double>(
+          tween: Tween<double>(begin: 0.05, end: -0.05), weight: 1),
+      TweenSequenceItem<double>(
+          tween: Tween<double>(begin: -0.05, end: 0.0), weight: 1),
+    ]).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.linear,
+    ));
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && !widget.isLevelActive) {
+        _controller.forward(from: 0.0);
+      }
+    });
+
+    _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      if (mounted && !widget.isLevelActive) {
+        _controller.forward(from: 0.0);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _handleLevelTap(BuildContext context, bool isLevelActive,
+      Map<String, dynamic> currentLevel) async {
+    if (isLevelActive) {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => LevelsSUnitsScreen(
+                    queryParam: currentLevel['nivel_tag'],
+                  )));
+    } else {
+      final result = await Navigator.push(
+          context,
+          PageRouteBuilder(
+              opaque: false,
+              barrierColor: Colors.transparent,
+              pageBuilder: (context, animation, secondaryAnimation) =>
+                  const CodeActivationScreen(),
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
+                return SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0.0, 1.0),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: child,
+                );
+              }));
+
+      if (result == true) {
+        ref.refresh(studentEGPProvider);
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () => _handleLevelTap(context, isLevelActive, currentLevel),
+        onTap: () =>
+            _handleLevelTap(context, widget.isLevelActive, widget.currentLevel),
         child: Container(
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(15),
-                boxShadow: [
+                boxShadow: const [
                   BoxShadow(
                       color: Color.fromRGBO(0, 0, 0, 0.3),
                       blurRadius: 6,
@@ -191,16 +248,20 @@ class LevelDetailsCard extends StatelessWidget {
             clipBehavior: Clip.hardEdge,
             child: Stack(children: [
               Image.network(
-                currentLevel['tarjeta'],
+                widget.currentLevel['tarjeta'],
                 fit: BoxFit.contain,
               ),
-              isLevelActive
+              widget.isLevelActive
                   ? const SizedBox()
                   : Positioned.fill(
                       child: Container(
-                          color: Colors.black.withValues(alpha: 0.7),
-                          child: const Icon(Icons.lock,
-                              size: 90, color: Colors.white)))
+                      color: Colors.black.withAlpha(178),
+                      child: RotationTransition(
+                        turns: _animation,
+                        child: const Icon(Icons.lock,
+                            size: 90, color: Colors.white),
+                      ),
+                    ))
             ])));
   }
 }

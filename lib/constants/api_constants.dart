@@ -6,4 +6,5 @@ class ApiConstants {
   static String groupEnroll = '$baseURL/group-enroll';
   static const String group = '$baseURL/group';
   static String groupUnenroll = '$baseURL/group-unenroll?word=LEAVE';
+  static const String activateCode = '$baseURL/activate-code';
 }

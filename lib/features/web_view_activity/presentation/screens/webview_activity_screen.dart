@@ -21,7 +21,13 @@ class WebViewActivity extends ConsumerStatefulWidget {
 class _WebViewActivityState extends ConsumerState<WebViewActivity> {
   static const Map<String, String> specialCases = {
     'out-of-tries-30': 'Use 30 mircoins to purchase an extra attempt',
+    'out-of-tries-35': 'Use 35 mircoins to purchase an extra attempt',
+    'out-of-tries-40': 'Use 40 mircoins to purchase an extra attempt',
+    'out-of-tries-45': 'Use 45 mircoins to purchase an extra attempt',
     'out-of-tries-50': 'Use 50 mircoins to purchase an extra attempt',
+    'out-of-tries-55': 'Use 55 mircoins to purchase an extra attempt',
+    'out-of-tries-60': 'Use 60 mircoins to purchase an extra attempt',
+    'out-of-tries-65': 'Use 65 mircoins to purchase an extra attempt',
   };
 
   // PASO 3: El controller se declara aquí y se inicializa en initState

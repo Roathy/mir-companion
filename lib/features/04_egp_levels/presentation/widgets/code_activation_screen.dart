@@ -1,4 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mironline/services/providers.dart';
+
+class UpperCaseTextFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    return TextEditingValue(
+      text: newValue.text.toUpperCase(),
+      selection: newValue.selection,
+    );
+  }
+}
 
 class CodeActivationScreen extends StatefulWidget {
   const CodeActivationScreen({
@@ -11,6 +25,7 @@ class CodeActivationScreen extends StatefulWidget {
 
 class _CodeActivationScreenState extends State<CodeActivationScreen> {
   final TextEditingController _activationController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -18,16 +33,20 @@ class _CodeActivationScreenState extends State<CodeActivationScreen> {
     super.dispose();
   }
 
+  void _setLoading(bool isLoading) {
+    setState(() {
+      _isLoading = isLoading;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
         child: Material(
-            // Make sure the Material widget is transparent
             type: MaterialType.transparency,
             child: Stack(children: [
-              // Semi-transparent overlay overlay that covers the entire screen
               Positioned.fill(
-                  child: Container(color: Colors.black.withValues(alpha: 0.3))),
+                  child: Container(color: Colors.black.withOpacity(0.3))),
               Container(
                   height: MediaQuery.of(context).size.height * 0.72,
                   margin:
@@ -35,20 +54,18 @@ class _CodeActivationScreenState extends State<CodeActivationScreen> {
                   decoration: BoxDecoration(
                     color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(16),
-                    // boxShadow: [
-                    //   BoxShadow(
-                    //       color: Colors.black.withValues(alpha: 0.3),
-                    //       blurRadius: 10,
-                    //       offset: const Offset(0, 4))
-                    // ],
                   ),
                   child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ContentDetailsForActivation(),
-                        ActivationCodeInput(),
-                        CancelSubmitButtons(),
+                        const ContentDetailsForActivation(),
+                        ActivationCodeInput(controller: _activationController),
+                        CancelSubmitButtons(
+                          activationController: _activationController,
+                          isLoading: _isLoading,
+                          setLoading: _setLoading,
+                        ),
                       ]))
             ])));
   }
@@ -63,7 +80,7 @@ class ContentDetailsForActivation extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 21.0),
-        child: Column(spacing: 9.0, children: [
+        child: Column(children: [
           const Center(
               child: Icon(Icons.lock_open, color: Colors.lightBlue, size: 30)),
           const Center(
@@ -77,17 +94,17 @@ class ContentDetailsForActivation extends StatelessWidget {
                   text:
                       'Please, enter your activation code to unlock this level. Your code is on your mironline card.\n',
                   children: [
-                    TextSpan(
+                    const TextSpan(
                         text: '\u{26A0} Remember: ',
                         style: TextStyle(color: Colors.red)),
-                    TextSpan(text: 'When you activate a new level, '),
-                    TextSpan(
+                    const TextSpan(text: 'When you activate a new level, '),
+                    const TextSpan(
                         text: 'you\'ll leave your current group',
                         style: TextStyle(fontWeight: FontWeight.bold)),
-                    TextSpan(
+                    const TextSpan(
                         text: ' to be able to join a new group this semester.')
                   ]),
-              style: TextStyle(fontSize: 17))
+              style: const TextStyle(fontSize: 17))
         ]));
   }
 }
@@ -95,30 +112,36 @@ class ContentDetailsForActivation extends StatelessWidget {
 class ActivationCodeInput extends StatelessWidget {
   const ActivationCodeInput({
     super.key,
+    required this.controller,
   });
+
+  final TextEditingController controller;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12.0),
       child: Column(
-        spacing: 9.0,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Activation code:',
             style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
           ),
           TextField(
-            // controller: _activationController,
+            controller: controller,
+            textCapitalization: TextCapitalization.characters,
+            inputFormatters: [
+              UpperCaseTextFormatter(),
+            ],
             decoration: InputDecoration(
               hintText: 'XXXXXXXX',
-              contentPadding: EdgeInsets.only(left: 9),
+              contentPadding: const EdgeInsets.only(left: 9),
               alignLabelWithHint: true,
-              hintStyle: TextStyle(color: Colors.black45),
-              enabledBorder: OutlineInputBorder(
+              hintStyle: const TextStyle(color: Colors.black45),
+              enabledBorder: const OutlineInputBorder(
                   borderSide: BorderSide(color: Colors.black45)),
-              focusedBorder: OutlineInputBorder(
+              focusedBorder: const OutlineInputBorder(
                   borderSide: BorderSide(color: Colors.lightBlue)),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -131,9 +154,9 @@ class ActivationCodeInput extends StatelessWidget {
           Text.rich(
             TextSpan(
                 text: '\u{1F625} Lost your mironline card?\t\t',
-                style: TextStyle(fontSize: 17),
+                style: const TextStyle(fontSize: 17),
                 children: [
-                  TextSpan(
+                  const TextSpan(
                       text: 'Click here',
                       style: TextStyle(color: Colors.lightBlue)),
                 ]),
@@ -144,18 +167,24 @@ class ActivationCodeInput extends StatelessWidget {
   }
 }
 
-class CancelSubmitButtons extends StatelessWidget {
+class CancelSubmitButtons extends ConsumerWidget {
   const CancelSubmitButtons({
     super.key,
+    required this.activationController,
+    required this.isLoading,
+    required this.setLoading,
   });
 
+  final TextEditingController activationController;
+  final bool isLoading;
+  final Function(bool) setLoading;
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
         padding: const EdgeInsets.only(right: 21.0),
         child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
-            spacing: 9.0,
             children: [
               OutlinedButton(
                   onPressed: () {
@@ -165,7 +194,7 @@ class CancelSubmitButtons extends StatelessWidget {
                       backgroundColor: Colors.white,
                       shape: ContinuousRectangleBorder(
                           borderRadius: BorderRadius.circular(15))),
-                  child: Text(
+                  child: const Text(
                     'Cancel',
                     style: TextStyle(
                         color: Colors.black,
@@ -173,18 +202,52 @@ class CancelSubmitButtons extends StatelessWidget {
                         fontSize: 15),
                   )),
               OutlinedButton(
-                  onPressed: () {},
+                  onPressed: isLoading
+                      ? null
+                      : () async {
+                          setLoading(true);
+                          try {
+                            final response = await ref
+                                .read(authServiceProvider)
+                                .unlockLevel(activationController.text);
+                            setLoading(false);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(response['message'] ?? 'Level unlocked successfully!'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                            Navigator.pop(context, true); // Return true to indicate success
+                          } catch (e) {
+                            setLoading(false);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(e.toString()),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        },
                   style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.lightBlue[100],
+                      backgroundColor: Colors.lightBlue,
                       shape: ContinuousRectangleBorder(
                           borderRadius: BorderRadius.circular(15))),
-                  child: Text(
-                    'Unlock',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15),
-                  )),
+                  child: isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : const Text(
+                          'Unlock',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15),
+                        )),
             ]));
   }
 }
