@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -31,7 +31,6 @@ Future<void> main() async {
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);
-  await dotenv.load(fileName: ".env");
 
   setRefreshRate(60.0);
   runApp(ProviderScope(child: MyApp()));
@@ -50,24 +49,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkAndShowTour();
-    });
-  }
-
-  Future<void> _checkAndShowTour() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      bool dontShowTour = prefs.getBool('dontShowTour') ?? false;
-
-      if (mounted) {
-        setState(() {
-          goHome = dontShowTour;
-        });
-      }
-    } catch (e, stackTrace) {
-      // TODO: Add proper error handling
-    }
+    // WidgetsBinding.instance.addPostFrameCallback((_) {});
   }
 
   @override
