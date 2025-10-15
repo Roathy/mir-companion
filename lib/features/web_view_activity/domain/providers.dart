@@ -8,7 +8,7 @@ import '../../02_auth/presentation/screens/auth_screen.dart';
 import '../data/activity_repository.dart';
 
 final activityRepositoryProvider = Provider<ActivityRepository>((ref) {
-  final apiClient = ref.read(apiClientProvider);
+  final apiClient = ref.watch(apiClientProvider);
   final authToken = ref.read(authTokenProvider);
   return ActivityRepository(dio: apiClient.dio, authToken: authToken);
 });

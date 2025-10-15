@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:mironline/services/device-id/device_info_repo_impl.dart';
 import 'package:mironline/services/device-id/presentation/login_view_model.dart';
 import 'package:app_set_id/app_set_id.dart';
+import 'package:mironline/services/user_data_provider.dart';
 import 'package:mironline/services/providers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -138,6 +139,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
     if (!mounted) return;
 
     if (result.status == LoginStatus.success) {
+      ref.read(userDataProvider.notifier).refresh();
       // --- NEW: SAVE/CLEAR LOGIC ADDED HERE ---
       // This is the only addition within this method.
       // It runs only after a successful login and before navigation.

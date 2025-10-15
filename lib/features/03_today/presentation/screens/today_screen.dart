@@ -5,23 +5,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:mironline/core/utils/crypto.dart';
+import 'package:mironline/features/02_auth/presentation/screens/auth_screen.dart';
 import 'package:mironline/features/web_view_activity/presentation/screens/webview_activity_screen.dart';
-import 'package:mironline/services/refresh_provider.dart';
+import 'package:mironline/network/api_endpoints.dart';
 import 'package:mironline/services/providers.dart';
+import 'package:mironline/services/refresh_provider.dart';
+import 'package:mironline/services/user_data_provider.dart';
 
-import '../../../../core/utils/utils.dart';
-import '../../../../network/api_endpoints.dart';
-import '../../../02_auth/presentation/screens/auth_screen.dart';
 import '../widgets/bg_image_container.dart';
-import '../widgets/today_app_bar.dart';
-
 import '../widgets/no_profile_data.dart';
+import '../widgets/today_app_bar.dart';
 
 final studentTodayProvider =
     FutureProvider.autoDispose<Map<String, dynamic>?>((ref) async {
   ref.watch(activitiesRefreshProvider);
   try {
-    final apiClient = ref.read(apiClientProvider);
+    final apiClient = ref.watch(apiClientProvider);
     final authToken = ref.read(authTokenProvider);
 
     if (authToken.isEmpty) {
@@ -55,114 +55,119 @@ class _StudentTodayScreenState extends ConsumerState<StudentTodayScreen> {
   @override
   Widget build(BuildContext context) {
     final profileAsync = ref.watch(studentTodayProvider);
+    final userDataAsync = ref.watch(userDataProvider);
 
-    return profileAsync.when(
-        data: (profileData) {
-          if (profileData == null) {
-            return const NoProfileData();
-          } else {
-            final alumno = profileData['alumno'];
-            final egp = profileData['actividades_siguientes']['egp'];
-            final String activityBgImgUrl = egp['cover_actividad'];
+    return userDataAsync.when(
+      data: (userData) {
+        return profileAsync.when(
+            data: (profileData) {
+              if (profileData == null) {
+                return const NoProfileData();
+              } else {
+                final egp = profileData['actividades_siguientes']['egp'];
+                final String activityBgImgUrl = egp['cover_actividad'];
 
-            return PopScope(
-              canPop: false,
-              onPopInvokedWithResult: (didPop, result) async {
-                final result = await showAdaptiveDialog(
-                    barrierDismissible: false,
-                    context: context,
-                    builder: (context) {
-                      return Dialog(
-                          child:
-                              Column(mainAxisSize: MainAxisSize.min, children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 30.0),
-                          child: Text(
-                            'Exit application?',
-                            style: TextStyle(fontSize: 27),
-                          ),
-                        ),
-                        Padding(
-                            padding: const EdgeInsets.only(
-                                right: 30.0, bottom: 21.0),
-                            child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  TextButton(
-                                      onPressed: () {
-                                        Navigator.pop(context, false);
+                return PopScope(
+                  canPop: false,
+                  onPopInvokedWithResult: (didPop, result) async {
+                    final result = await showAdaptiveDialog(
+                        barrierDismissible: false,
+                        context: context,
+                        builder: (context) {
+                          return Dialog(
+                              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 30.0),
+                              child: Text(
+                                'Exit application?',
+                                style: TextStyle(fontSize: 27),
+                              ),
+                            ),
+                            Padding(
+                                padding: const EdgeInsets.only(
+                                    right: 30.0, bottom: 21.0),
+                                child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      TextButton(
+                                          onPressed: () {
+                                            Navigator.pop(context, false);
+                                          },
+                                          child: Text(
+                                            'NO',
+                                            style: TextStyle(fontSize: 18),
+                                          )),
+                                      TextButton(
+                                          onPressed: () {
+                                            Navigator.pop(context, true);
+                                          },
+                                          child: Text(
+                                            'YES',
+                                            style: TextStyle(fontSize: 18),
+                                          )),
+                                    ]))
+                          ]));
+                        });
+                    if (result == true) {
+                      SystemNavigator.pop(animated: true);
+                    }
+                  },
+                  child: Scaffold(
+                      appBar: TodayAppBar(
+                        mircoins: userData.mircoins,
+                        userName: userData.fullname,
+                      ),
+                      body: SafeArea(
+                          child: SingleChildScrollView(
+                              primary: true,
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              padding: const EdgeInsets.all(24),
+                              child: Column(
+                                  spacing: 30,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.pushNamed(context, '/egp-levels');
                                       },
-                                      child: Text(
-                                        'NO',
-                                        style: TextStyle(fontSize: 18),
-                                      )),
-                                  TextButton(
-                                      onPressed: () {
-                                        Navigator.pop(context, true);
-                                      },
-                                      child: Text(
-                                        'YES',
-                                        style: TextStyle(fontSize: 18),
-                                      )),
-                                ]))
-                      ]));
-                    });
-                if (result == true) {
-                  SystemNavigator.pop(animated: true);
-                }
-              },
-              child: Scaffold(
-                  appBar: TodayAppBar(
-                    mircoins: alumno['mircoins'] ?? 0,
-                    userName: '${alumno['fullname']}',
-                  ),
-                  body: SafeArea(
-                      child: SingleChildScrollView(
-                          primary: true,
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
-                              spacing: 30,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                GestureDetector(
-                                  onTap: () {
-                                    Navigator.pushNamed(context, '/egp-levels');
-                                  },
-                                  child: const BgImageContainer(
-                                    heightMultiplier: 0.18,
-                                    imageUrl:
-                                        "https://mironline.io/assets/img/today/bg_thumbnail.jpg",
-                                    content: EGPTitle(),
-                                  ),
-                                ),
-                                const DateDetails(),
-                                GestureDetector(
-                                    onTap: () {
-                                      final String activityQuery =
-                                          '/${egp['nivel_tag']}/u${egp['int_unidad']}/${egp['int_actividad']}';
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => WebViewActivity(
-                                              activityQuery: activityQuery),
-                                        ),
-                                      ).then((_) {
-                                        ref.invalidate(studentTodayProvider);
-                                      });
-                                    },
-                                    child: BgImageContainer(
-                                      imageUrl: activityBgImgUrl,
-                                      content: LastActivityDetails(egp: egp),
-                                    ))
-                              ])))),
-            );
-          }
-        },
-        loading: () => const Scaffold(
-            body: SafeArea(child: Center(child: CircularProgressIndicator()))),
-        error: (error, stackTrace) => Scaffold(
-            body: SafeArea(child: Center(child: Text(error.toString())))));
+                                      child: const BgImageContainer(
+                                        heightMultiplier: 0.18,
+                                        imageUrl:
+                                            "https://mironline.io/assets/img/today/bg_thumbnail.jpg",
+                                        content: EGPTitle(),
+                                      ),
+                                    ),
+                                    const DateDetails(),
+                                    GestureDetector(
+                                        onTap: () {
+                                          final String activityQuery =
+                                              '/${egp['nivel_tag']}/u${egp['int_unidad']}/${egp['int_actividad']}';
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => WebViewActivity(
+                                                  activityQuery: activityQuery),
+                                            ),
+                                          );
+                                        },
+                                        child: BgImageContainer(
+                                          imageUrl: activityBgImgUrl,
+                                          content: LastActivityDetails(egp: egp),
+                                        ))
+                                  ])))),
+                );
+              }
+            },
+            loading: () => const Scaffold(
+                body: SafeArea(child: Center(child: CircularProgressIndicator()))),
+            error: (error, stackTrace) => Scaffold(
+                body: SafeArea(child: Center(child: Text(error.toString())))));
+      },
+      loading: () => const Scaffold(
+          body: SafeArea(child: Center(child: CircularProgressIndicator()))),
+      error: (error, stackTrace) => Scaffold(
+          body: SafeArea(child: Center(child: Text(error.toString())))),
+    );
   }
 }
 

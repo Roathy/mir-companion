@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:mironline/services/user_data_provider.dart';
 import 'package:mironline/services/providers.dart';
 
 import '../../../../core/utils/utils.dart';
@@ -13,7 +14,7 @@ import '../../../06_unit_activities/presentation/screens/unit_activities_screen.
 final studentLevelUnits = FutureProvider.autoDispose
     .family<Map<String, dynamic>?, String>((ref, queryParam) async {
   try {
-    final apiClient = ref.read(apiClientProvider);
+    final apiClient = ref.watch(apiClientProvider);
     final authToken = ref.read(authTokenProvider);
 
     if (authToken.isEmpty) {
@@ -48,99 +49,110 @@ class LevelsSUnitsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final levelsAsync = ref.watch(studentLevelUnits(queryParam));
-    return levelsAsync.when(
-        data: (unitsData) {
-          if (unitsData == null) {
-            return const Scaffold(
-              body: SafeArea(child: Center(child: Text('No units found'))),
-            );
-          } else {
-            final mircoins = unitsData['alumno']['mircoins'];
-            final String title = unitsData['nivel'];
-            final List units = unitsData['unidades'];
+    final userDataAsync = ref.watch(userDataProvider);
 
-            return Scaffold(
-                appBar: UnitsAppBar(title: title, mircoins: mircoins),
-                body: SafeArea(
-                    child: SingleChildScrollView(
-                        child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 21.0, vertical: 45),
-                            child: Column(
-                                spacing: 30,
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: List.generate(units.length, (index) {
-                                  final bool isUnitActive =
-                                      units[index]['desbloqueada'];
-                                  return Stack(
-                                    children: [
-                                      GestureDetector(
-                                          behavior: HitTestBehavior.opaque,
-                                          onTap: () {
-                                            final String queryParam =
-                                                '${unitsData['nivel_tag']}/u${units[index]['int_unidad']}';
-                                            ref
-                                                .read(
-                                                    unitParamProvider.notifier)
-                                                .state = queryParam;
-                                            Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        UnitActivitiesScreen()));
-                                          },
-                                          child: Material(
-                                              elevation: 1,
-                                              borderRadius:
-                                                  BorderRadius.circular(16),
-                                              shadowColor: Colors.black
-                                                  .withValues(alpha: 0.3),
-                                              child: Container(
-                                                decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            16),
-                                                    boxShadow: [
-                                                      BoxShadow(
-                                                          color: Color.fromRGBO(
-                                                              0,
-                                                              0,
-                                                              0,
-                                                              0.2), // 0.3 represents 30% opacity
-                                                          blurRadius: 3,
-                                                          spreadRadius: 3,
-                                                          offset: Offset(0, 0))
-                                                    ]),
-                                                clipBehavior: Clip.hardEdge,
-                                                child: UnitHeader(
-                                                    currentUnit: units[index]),
-                                              ))),
-                                      isUnitActive
-                                          ? const SizedBox()
-                                          : Positioned.fill(
-                                              child: Container(
-                                                  decoration: BoxDecoration(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              16),
-                                                      color: Colors.black
-                                                          .withValues(
-                                                              alpha: 0.7)),
-                                                  child: const Icon(Icons.lock,
-                                                      size: 90,
-                                                      color: Colors.white)))
-                                    ],
-                                  );
-                                }))))));
-          }
-        },
-        loading: () => const Scaffold(
-              body: SafeArea(child: Center(child: CircularProgressIndicator())),
-            ),
-        error: (error, stackTrace) => Scaffold(
-              body: SafeArea(child: Center(child: Text(error.toString()))),
-            ));
+    return userDataAsync.when(
+      data: (userData) {
+        return levelsAsync.when(
+            data: (unitsData) {
+              if (unitsData == null) {
+                return const Scaffold(
+                  body: SafeArea(child: Center(child: Text('No units found'))),
+                );
+              } else {
+                final String title = unitsData['nivel'];
+                final List units = unitsData['unidades'];
+
+                return Scaffold(
+                    appBar: UnitsAppBar(title: title, mircoins: userData.mircoins),
+                    body: SafeArea(
+                        child: SingleChildScrollView(
+                            child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 21.0, vertical: 45),
+                                child: Column(
+                                    spacing: 30,
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: List.generate(units.length, (index) {
+                                      final bool isUnitActive =
+                                          units[index]['desbloqueada'];
+                                      return Stack(
+                                        children: [
+                                          GestureDetector(
+                                              behavior: HitTestBehavior.opaque,
+                                              onTap: () {
+                                                final String queryParam =
+                                                    '${unitsData['nivel_tag']}/u${units[index]['int_unidad']}';
+                                                ref
+                                                    .read(
+                                                        unitParamProvider.notifier)
+                                                    .state = queryParam;
+                                                Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            UnitActivitiesScreen()));
+                                              },
+                                              child: Material(
+                                                  elevation: 1,
+                                                  borderRadius:
+                                                      BorderRadius.circular(16),
+                                                  shadowColor: Colors.black
+                                                      .withValues(alpha: 0.3),
+                                                  child: Container(
+                                                    decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                                16),
+                                                        boxShadow: [
+                                                          BoxShadow(
+                                                              color: Color.fromRGBO(
+                                                                  0,
+                                                                  0,
+                                                                  0,
+                                                                  0.2), // 0.3 represents 30% opacity
+                                                              blurRadius: 3,
+                                                              spreadRadius: 3,
+                                                              offset: Offset(0, 0))
+                                                        ]),
+                                                    clipBehavior: Clip.hardEdge,
+                                                    child: UnitHeader(
+                                                        currentUnit: units[index]),
+                                                  ))),
+                                          isUnitActive
+                                              ? const SizedBox()
+                                              : Positioned.fill(
+                                                  child: Container(
+                                                      decoration: BoxDecoration(
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                  16),
+                                                          color: Colors.black
+                                                              .withValues(
+                                                                  alpha: 0.7)),
+                                                      child: const Icon(Icons.lock,
+                                                          size: 90,
+                                                          color: Colors.white)))
+                                        ],
+                                      );
+                                    }))))));
+              }
+            },
+            loading: () => const Scaffold(
+                  body: SafeArea(child: Center(child: CircularProgressIndicator())),
+                ),
+            error: (error, stackTrace) => Scaffold(
+                  body: SafeArea(child: Center(child: Text(error.toString()))),
+                ));
+      },
+      loading: () => const Scaffold(
+        body: SafeArea(child: Center(child: CircularProgressIndicator())),
+      ),
+      error: (error, stackTrace) => Scaffold(
+        body: SafeArea(child: Center(child: Text(error.toString()))),
+      ),
+    );
   }
 }
 

@@ -2,7 +2,7 @@ name: mironline
 description: "Pocket version for make it real and mironline language learning resources!"
 publish_to: 'none' 
 
-version: 1.0.6+21
+version: 1.0.6+23
 
 environment:
   sdk: ^3.5.3

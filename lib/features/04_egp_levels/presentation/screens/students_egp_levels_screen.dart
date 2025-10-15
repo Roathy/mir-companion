@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:mironline/services/user_data_provider.dart';
 import 'package:mironline/services/providers.dart';
 
 import '../../../../core/utils/utils.dart';
@@ -16,7 +17,7 @@ import '../widgets/code_activation_screen.dart';
 final studentEGPProvider =
     FutureProvider.autoDispose<Map<String, dynamic>?>((ref) async {
   try {
-    final apiClient = ref.read(apiClientProvider);
+    final apiClient = ref.watch(apiClientProvider);
     final authToken = ref.read(authTokenProvider);
 
     if (authToken.isEmpty) {
@@ -77,56 +78,66 @@ class _StudentsEgpLevelsScreenState
   @override
   Widget build(BuildContext context) {
     final levelsAsync = ref.watch(studentEGPProvider);
+    final userDataAsync = ref.watch(userDataProvider);
 
-    return levelsAsync.when(
-      data: (levelsData) {
-        if (levelsData == null) {
-          return const Scaffold(
-            body: SafeArea(child: Center(child: Text('No levels found'))),
-          );
-        }
+    return userDataAsync.when(
+      data: (userData) {
+        return levelsAsync.when(
+          data: (levelsData) {
+            if (levelsData == null) {
+              return const Scaffold(
+                body: SafeArea(child: Center(child: Text('No levels found'))),
+              );
+            }
 
-        final List niveles = levelsData['niveles'];
-        final int mircoins = levelsData['alumno']['mircoins'];
+            final List niveles = levelsData['niveles'];
 
-        // Initialize controller with 3 copies of the content
-        // This allows one full set before and after the middle set
-        // Start at the beginning of middle set
-        _pageController = PageController(initialPage: niveles.length);
+            // Initialize controller with 3 copies of the content
+            // This allows one full set before and after the middle set
+            // Start at the beginning of middle set
+            _pageController = PageController(initialPage: niveles.length);
 
-        return Scaffold(
-            resizeToAvoidBottomInset: false,
-            appBar: EGPAppBar(mircoins: mircoins),
-            body: SafeArea(
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                  Flexible(
-                    flex: 5,
-                    child: PageView.builder(
-                        controller: _pageController,
-                        itemBuilder: (context, index) {
-                          final adjustedIndex = index % niveles.length;
-                          final currentLevel = niveles[adjustedIndex];
-                          final bool isLevelActive = currentLevel['activacion'];
+            return Scaffold(
+                resizeToAvoidBottomInset: false,
+                appBar: EGPAppBar(mircoins: userData.mircoins),
+                body: SafeArea(
+                    child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                      Flexible(
+                        flex: 5,
+                        child: PageView.builder(
+                            controller: _pageController,
+                            itemBuilder: (context, index) {
+                              final adjustedIndex = index % niveles.length;
+                              final currentLevel = niveles[adjustedIndex];
+                              final bool isLevelActive = currentLevel['activacion'];
 
-                          return Stack(children: [
-                            Center(
-                                child: LevelDetailsCard(
-                                    isLevelActive: isLevelActive,
-                                    currentLevel: currentLevel))
-                          ]);
-                        },
-                        itemCount: niveles.length * 3,
-                        onPageChanged: (index) =>
-                            _handlePageChange(index, niveles.length)),
-                  ),
-                  Flexible(
-                    flex: 4,
-                    child: NavStateIndicator(niveles: niveles),
-                  ),
-                  const Spacer()
-                ])));
+                              return Stack(children: [
+                                Center(
+                                    child: LevelDetailsCard(
+                                        isLevelActive: isLevelActive,
+                                        currentLevel: currentLevel))
+                              ]);
+                            },
+                            itemCount: niveles.length * 3,
+                            onPageChanged: (index) =>
+                                _handlePageChange(index, niveles.length)),
+                      ),
+                      Flexible(
+                        flex: 4,
+                        child: NavStateIndicator(niveles: niveles),
+                      ),
+                      const Spacer()
+                    ])));
+          },
+          loading: () => const Scaffold(
+            body: SafeArea(child: Center(child: CircularProgressIndicator())),
+          ),
+          error: (error, stackTrace) => Scaffold(
+            body: SafeArea(child: Center(child: Text(error.toString()))),
+          ),
+        );
       },
       loading: () => const Scaffold(
         body: SafeArea(child: Center(child: CircularProgressIndicator())),
