@@ -1,5 +1,7 @@
 import 'dart:developer';
 
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,12 +9,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mironline/core/utils/crypto.dart';
 import 'package:mironline/features/02_auth/presentation/screens/auth_screen.dart';
+import 'package:mironline/features/05_egp_units/presentation/screens/levels_s_units_screen.dart';
 import 'package:mironline/features/web_view_activity/presentation/screens/webview_activity_screen.dart';
 import 'package:mironline/network/api_endpoints.dart';
 import 'package:mironline/services/providers.dart';
 import 'package:mironline/services/refresh_provider.dart';
 import 'package:mironline/services/user_data_provider.dart';
 
+import '../../../06_unit_activities/presentation/screens/unit_activities_screen.dart';
 import '../widgets/bg_image_container.dart';
 import '../widgets/no_profile_data.dart';
 import '../widgets/today_app_bar.dart';
@@ -38,8 +42,11 @@ final studentTodayProvider =
         "Authorization": "Bearer $authToken",
       }),
     );
+    log('Student today data: ${response.data}');
     return response.data['data'];
-  } catch (e) {
+  } catch (e, stackTrace) {
+    log('Error fetching student today data: $e');
+    log('Stack trace: $stackTrace');
     return null;
   }
 });
@@ -51,7 +58,27 @@ class StudentTodayScreen extends ConsumerStatefulWidget {
   ConsumerState<StudentTodayScreen> createState() => _StudentTodayScreenState();
 }
 
-class _StudentTodayScreenState extends ConsumerState<StudentTodayScreen> {
+class _StudentTodayScreenState extends ConsumerState<StudentTodayScreen>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      ref.invalidate(studentTodayProvider);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final profileAsync = ref.watch(studentTodayProvider);
@@ -65,6 +92,7 @@ class _StudentTodayScreenState extends ConsumerState<StudentTodayScreen> {
                 return const NoProfileData();
               } else {
                 final egp = profileData['actividades_siguientes']['egp'];
+                debugPrint('egp: $egp');
                 final String activityBgImgUrl = egp['cover_actividad'];
 
                 return PopScope(
@@ -75,38 +103,42 @@ class _StudentTodayScreenState extends ConsumerState<StudentTodayScreen> {
                         context: context,
                         builder: (context) {
                           return Dialog(
-                              child: Column(mainAxisSize: MainAxisSize.min, children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 30.0),
-                              child: Text(
-                                'Exit application?',
-                                style: TextStyle(fontSize: 27),
-                              ),
-                            ),
-                            Padding(
-                                padding: const EdgeInsets.only(
-                                    right: 30.0, bottom: 21.0),
-                                child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      TextButton(
-                                          onPressed: () {
-                                            Navigator.pop(context, false);
-                                          },
-                                          child: Text(
-                                            'NO',
-                                            style: TextStyle(fontSize: 18),
-                                          )),
-                                      TextButton(
-                                          onPressed: () {
-                                            Navigator.pop(context, true);
-                                          },
-                                          child: Text(
-                                            'YES',
-                                            style: TextStyle(fontSize: 18),
-                                          )),
-                                    ]))
-                          ]));
+                              child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 30.0),
+                                  child: Text(
+                                    'Exit application?',
+                                    style: TextStyle(fontSize: 27),
+                                  ),
+                                ),
+                                Padding(
+                                    padding: const EdgeInsets.only(
+                                        right: 30.0, bottom: 21.0),
+                                    child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          TextButton(
+                                              onPressed: () {
+                                                Navigator.pop(context, false);
+                                              },
+                                              child: Text(
+                                                'NO',
+                                                style: TextStyle(fontSize: 18),
+                                              )),
+                                          TextButton(
+                                              onPressed: () {
+                                                Navigator.pop(context, true);
+                                              },
+                                              child: Text(
+                                                'YES',
+                                                style: TextStyle(fontSize: 18),
+                                              )),
+                                        ]))
+                              ]));
                         });
                     if (result == true) {
                       SystemNavigator.pop(animated: true);
@@ -128,7 +160,8 @@ class _StudentTodayScreenState extends ConsumerState<StudentTodayScreen> {
                                   children: [
                                     GestureDetector(
                                       onTap: () {
-                                        Navigator.pushNamed(context, '/egp-levels');
+                                        Navigator.pushNamed(
+                                            context, '/egp-levels');
                                       },
                                       child: const BgImageContainer(
                                         heightMultiplier: 0.18,
@@ -139,27 +172,124 @@ class _StudentTodayScreenState extends ConsumerState<StudentTodayScreen> {
                                     ),
                                     const DateDetails(),
                                     GestureDetector(
-                                        onTap: () {
-                                          final String activityQuery =
-                                              '/${egp['nivel_tag']}/u${egp['int_unidad']}/${egp['int_actividad']}';
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => WebViewActivity(
-                                                  activityQuery: activityQuery),
-                                            ),
-                                          );
+                                        onTap: () async {
+                                          final lastActivityStats =
+                                              egp['ultima_estadistica'];
+                                          if (lastActivityStats == null ||
+                                              lastActivityStats == false) {
+                                            final String activityQuery =
+                                                '/${egp['nivel_tag']}/u${egp['int_unidad']}/${egp['int_actividad']}';
+                                            await Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    WebViewActivity(
+                                                        activityQuery:
+                                                            activityQuery),
+                                              ),
+                                            );
+                                            ref.invalidate(
+                                                studentTodayProvider);
+                                          } else {
+                                            final currentActivityId =
+                                                egp['id_actividad'];
+                                            final lastActivityId =
+                                                lastActivityStats[
+                                                    'id_actividad'];
+                                            debugPrint(
+                                                'currentActivityId: $currentActivityId');
+                                            debugPrint(
+                                                'lastActivityId: $lastActivityId');
+                                            if (currentActivityId >
+                                                lastActivityId) {
+                                              final String activityQuery =
+                                                  '/${egp['nivel_tag']}/u${egp['int_unidad']}/${egp['int_actividad']}';
+                                              await Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      WebViewActivity(
+                                                          activityQuery:
+                                                              activityQuery),
+                                                ),
+                                              );
+                                              ref.invalidate(
+                                                  studentTodayProvider);
+                                            } else {
+                                              showDialog(
+                                                context: context,
+                                                builder: (context) =>
+                                                    AlertDialog(
+                                                  title: const Text(
+                                                      'You\'ve already made this activity!'),
+                                                  content: const Text(
+                                                      'You can try and get a higher score or navigate to the next activity.'),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () async {
+                                                        Navigator.pop(context);
+                                                        final String
+                                                            activityQuery =
+                                                            '/${egp['nivel_tag']}/u${egp['int_unidad']}/${egp['int_actividad']}';
+                                                        await Navigator.push(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                            builder: (context) =>
+                                                                WebViewActivity(
+                                                                    activityQuery:
+                                                                        activityQuery),
+                                                          ),
+                                                        );
+                                                        ref.invalidate(
+                                                            studentTodayProvider);
+                                                      },
+                                                      child:
+                                                          const Text('Retry'),
+                                                    ),
+                                                    TextButton(
+                                                      onPressed: () async {
+                                                        Navigator.pop(context);
+                                                        final String
+                                                            queryParam =
+                                                            '${egp['nivel_tag']}/u${egp['int_unidad']}';
+                                                        debugPrint(
+                                                            'queryParam: $queryParam');
+                                                        ref
+                                                            .read(
+                                                                unitParamProvider
+                                                                    .notifier)
+                                                            .state = queryParam;
+                                                        await Navigator.push(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                            builder: (context) =>
+                                                                UnitActivitiesScreen(),
+                                                          ),
+                                                        );
+                                                        ref.invalidate(
+                                                            studentTodayProvider);
+                                                      },
+                                                      child: const Text(
+                                                          'Find next activity'),
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            }
+                                          }
                                         },
                                         child: BgImageContainer(
                                           imageUrl: activityBgImgUrl,
-                                          content: LastActivityDetails(egp: egp),
+                                          content:
+                                              LastActivityDetails(egp: egp),
                                         ))
                                   ])))),
                 );
               }
             },
             loading: () => const Scaffold(
-                body: SafeArea(child: Center(child: CircularProgressIndicator()))),
+                body: SafeArea(
+                    child: Center(child: CircularProgressIndicator()))),
             error: (error, stackTrace) => Scaffold(
                 body: SafeArea(child: Center(child: Text(error.toString())))));
       },
