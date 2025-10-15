@@ -1,9 +1,10 @@
-import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:mironline/core/utils/json_utils.dart';
 import 'package:mironline/services/auth_service.dart';
 import 'package:mironline/services/providers.dart';
 
@@ -311,7 +312,7 @@ class _JoinGroupFormState extends ConsumerState<JoinGroupForm> {
           if (bodyMatch != null) {
             final body = bodyMatch.group(1);
             try {
-              final decodedBody = json.decode(body!);
+              final decodedBody = await compute(jsonDecode, body!);
               if (decodedBody['error'] != null &&
                   decodedBody['error']['message'] != null) {
                 errorMessage = decodedBody['error']['message'];
