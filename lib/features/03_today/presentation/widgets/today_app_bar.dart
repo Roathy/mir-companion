@@ -24,8 +24,8 @@ class TodayAppBar extends StatelessWidget implements PreferredSizeWidget {
         children: [
           Hero(
             tag: 'mironline-logo',
-            child: Image.network(
-              'https://mironline.io//assets/img/logos/logo_mir_color_cut.png',
+            child: Image.asset(
+              'assets/logo.png',
               width: 120,
               height: 120,
               fit: BoxFit.contain,
