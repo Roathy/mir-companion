@@ -1,13 +1,12 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:mironline/network/api_client.dart';
-import 'package:mironline/network/api_endpoints.dart';
-import 'package:mironline/core/utils/crypto.dart';
-import 'package:mironline/services/providers.dart';
 
+import '../core/utils/crypto.dart';
 import '../features/02_auth/presentation/screens/auth_screen.dart';
+import '../network/api_endpoints.dart';
+import 'providers.dart';
 
 @immutable
 class UserData {

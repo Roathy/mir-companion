@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 
 import '../../../core/utils/utils.dart';
 import '../../../network/api_endpoints.dart';

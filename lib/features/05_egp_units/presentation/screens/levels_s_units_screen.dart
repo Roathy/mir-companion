@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:mironline/services/user_data_provider.dart';
-import 'package:mironline/services/providers.dart';
+import '../../../../services/user_data_provider.dart';
+import '../../../../services/providers.dart';
 
 import '../../../../core/utils/utils.dart';
 import '../../../../network/api_endpoints.dart';

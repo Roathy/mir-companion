@@ -1,18 +1,18 @@
+import 'package:app_set_id/app_set_id.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:mironline/services/device-id/device_info_repo_impl.dart';
-import 'package:mironline/services/device-id/presentation/login_view_model.dart';
-import 'package:app_set_id/app_set_id.dart';
-import 'package:mironline/services/user_data_provider.dart';
-import 'package:mironline/services/providers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/utils/utils.dart';
 import '../../../../network/api_endpoints.dart';
+import '../../../../services/device-id/device_info_repo_impl.dart';
+import '../../../../services/device-id/presentation/login_view_model.dart';
+import '../../../../services/providers.dart';
+import '../../../../services/user_data_provider.dart';
 import '../../../03_today/presentation/screens/today_screen.dart';
 import '../widgets/widgets.dart';
 

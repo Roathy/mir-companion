@@ -4,9 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:mironline/core/utils/json_utils.dart';
-import 'package:mironline/services/auth_service.dart';
-import 'package:mironline/services/providers.dart';
+
+import '../../../../core/utils/json_utils.dart';
+import '../../../../services/auth_service.dart';
+import '../../../../services/providers.dart';
 
 // 1. Define the state
 enum GroupStatus { initial, loading, data, error, notEnrolled }

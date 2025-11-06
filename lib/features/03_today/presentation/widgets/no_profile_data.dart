@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mironline/services/user_data_provider.dart';
-import 'package:mironline/services/providers.dart';
 
+import '../../../../services/providers.dart';
+import '../../../../services/user_data_provider.dart';
 import '../../../02_auth/presentation/screens/auth_screen.dart';
 
 class NoProfileData extends ConsumerWidget {

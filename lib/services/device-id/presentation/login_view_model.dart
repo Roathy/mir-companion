@@ -1,4 +1,4 @@
-import 'package:mironline/services/device-id/device_info_repository.dart';
+import '../device_info_repository.dart';
 
 class LoginViewModel {
   final DeviceInfoRepository _deviceInfoRepository;

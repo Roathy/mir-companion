@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-import 'package:mironline/services/providers.dart';
+import '../../services/providers.dart';
 import '../02_auth/presentation/screens/auth_screen.dart';
 
 class AnimatedSplashScreen extends ConsumerStatefulWidget {

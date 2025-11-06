@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mironline/services/refresh_provider.dart';
 import 'package:mironline/services/providers.dart';
 
+import '../../../services/refresh_provider.dart';
 import '../../02_auth/presentation/screens/auth_screen.dart';
 import '../data/activity_repository.dart';
 

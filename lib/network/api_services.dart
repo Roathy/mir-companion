@@ -1,4 +1,4 @@
-import 'package:mironline/network/api_client.dart';
+import 'api_client.dart';
 
 class ApiService {
   final ApiClient apiClient;

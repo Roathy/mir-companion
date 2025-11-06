@@ -1,5 +1,5 @@
 import 'package:app_set_id/app_set_id.dart';
-import 'package:mironline/services/device-id/device_info_repository.dart';
+import 'device_info_repository.dart';
 
 class DeviceInfoRepoImpl implements DeviceInfoRepository {
   final AppSetId _appSetId;

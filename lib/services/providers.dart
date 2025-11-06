@@ -1,10 +1,10 @@
 import 'package:app_set_id/app_set_id.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mironline/network/api_client.dart';
-import 'package:mironline/services/auth_service.dart';
-import 'package:mironline/services/device-id/device_info_repo_impl.dart';
-import 'package:mironline/features/02_auth/presentation/screens/auth_screen.dart';
 
+import '../features/02_auth/presentation/screens/auth_screen.dart';
+import '../network/api_client.dart';
+import 'auth_service.dart';
+import 'device-id/device_info_repo_impl.dart';
 import 'device-id/device_info_repository.dart';
 
 // Provider for AppSetId package

@@ -1,17 +1,16 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
-
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:mironline/services/user_data_provider.dart';
-import 'package:mironline/services/providers.dart';
 
 import '../../../../core/utils/utils.dart';
-import '../../../05_egp_units/presentation/screens/levels_s_units_screen.dart';
 import '../../../../network/api_endpoints.dart';
+import '../../../../services/providers.dart';
+import '../../../../services/user_data_provider.dart';
 import '../../../02_auth/presentation/screens/auth_screen.dart';
+import '../../../05_egp_units/presentation/screens/levels_s_units_screen.dart';
 import '../widgets/code_activation_screen.dart';
 
 final studentEGPProvider =

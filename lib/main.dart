@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'features/00_splash/animated_splash_screen.dart';
 import 'features/01_welcome_tour/welcome_tour_page.dart';
@@ -9,9 +8,6 @@ import 'features/02_auth/presentation/screens/auth_screen.dart';
 import 'features/03_today/presentation/screens/join_group_screen.dart';
 import 'features/03_today/presentation/screens/today_screen.dart';
 import 'features/04_egp_levels/presentation/screens/students_egp_levels_screen.dart';
-
-import 'package:flutter/services.dart';
-
 import 'features/06_unit_activities/presentation/screens/unit_activities_screen.dart';
 
 const platform = MethodChannel('refresh_rate');

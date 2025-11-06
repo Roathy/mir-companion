@@ -1,14 +1,13 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
-import 'package:mironline/core/utils/crypto.dart';
-import 'package:mironline/core/utils/json_utils.dart';
-import 'package:mironline/services/device-id/device_info_repository.dart';
 
 import '../../constants/api_constants.dart';
+import '../core/utils/crypto.dart';
+import '../core/utils/json_utils.dart';
+import 'device-id/device_info_repository.dart';
 
 class NotEnrolledInGroupException implements Exception {
   final String message;
@@ -44,7 +43,8 @@ class AuthService {
     try {
       final response = await http.Response.fromStream(await request.send());
       if (response.statusCode == 200) {
-        final Map<String, dynamic> decodedResponse = await compute(jsonDecode, response.body);
+        final Map<String, dynamic> decodedResponse =
+            await compute(jsonDecode, response.body);
         await Future.delayed(const Duration(milliseconds: 120));
 
         if (decodedResponse.containsKey('data')) {
@@ -88,7 +88,8 @@ class AuthService {
       final response = await http.get(url, headers: headers);
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> decodedResponse = await compute(jsonDecode, response.body);
+        final Map<String, dynamic> decodedResponse =
+            await compute(jsonDecode, response.body);
 
         await Future.delayed(const Duration(milliseconds: 120));
         if (decodedResponse.containsKey('data')) {
@@ -178,7 +179,8 @@ class AuthService {
       final response = await http.post(url, headers: headers, body: body);
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> decodedResponse = await compute(jsonDecode, response.body);
+        final Map<String, dynamic> decodedResponse =
+            await compute(jsonDecode, response.body);
         return decodedResponse;
       } else {
         throw Exception(
@@ -209,7 +211,8 @@ class AuthService {
       final response = await http.post(url, headers: headers, body: body);
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> decodedResponse = await compute(jsonDecode, response.body);
+        final Map<String, dynamic> decodedResponse =
+            await compute(jsonDecode, response.body);
         return decodedResponse;
       } else {
         throw Exception(
@@ -265,17 +268,21 @@ class AuthService {
       final response = await http.get(url, headers: headers);
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> decodedResponse = await compute(jsonDecode, response.body);
+        final Map<String, dynamic> decodedResponse =
+            await compute(jsonDecode, response.body);
         return decodedResponse;
       } else if (response.statusCode == 400) {
-        final Map<String, dynamic> decodedResponse = await compute(jsonDecode, response.body);
+        final Map<String, dynamic> decodedResponse =
+            await compute(jsonDecode, response.body);
         if (decodedResponse.containsKey('error') &&
             decodedResponse['error']['message'] ==
                 'You are not currently enrolled in a group') {
-          throw NotEnrolledInGroupException(decodedResponse['error']['message']);
+          throw NotEnrolledInGroupException(
+              decodedResponse['error']['message']);
         }
       }
-      throw Exception('Failed to fetch group. Status code: ${response.statusCode}');
+      throw Exception(
+          'Failed to fetch group. Status code: ${response.statusCode}');
     } catch (e) {
       if (e is NotEnrolledInGroupException) {
         rethrow;
