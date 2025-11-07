@@ -2,7 +2,7 @@ name: mironline
 description: "Pocket version for make it real and mironline language learning resources!"
 publish_to: 'none' 
 
-version: 1.0.6+28
+version: 1.0.8+30
 
 environment:
   sdk: ^3.5.3
@@ -45,6 +45,7 @@ dev_dependencies:
   json_serializable: ^6.9.4
   riverpod_generator: ^3.0.0
   riverpod_lint: ^3.0.0-dev.17
+  mockito: ^5.5.0
 
 flutter_launcher_icons:
   android: true
