@@ -225,14 +225,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.6"
-  cupertino_icons:
-    dependency: "direct main"
-    description:
-      name: cupertino_icons
-      sha256: ba631d1c7f7bef6b729a622b7b752645a2d076dba9976925b8f25725a30e1ee6
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.8"
   custom_lint:
     dependency: "direct dev"
     description:
@@ -616,14 +608,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.11.1"
-  kg_charts:
-    dependency: "direct main"
-    description:
-      name: kg_charts
-      sha256: d2bc219b0eeceeec54c75a5ab4c2cc76bb2a5860a568f2082e7384ae3c9475da
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.5"
   leak_tracker:
     dependency: transitive
     description:
@@ -697,7 +681,7 @@ packages:
     source: hosted
     version: "2.0.0"
   mockito:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: mockito
       sha256: "2314cbe9165bcd16106513df9cf3c3224713087f09723b128928dc11a4379f99"
