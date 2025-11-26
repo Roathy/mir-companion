@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'features/00_splash/animated_splash_screen.dart';
-import 'features/01_welcome_tour/welcome_tour_page.dart';
 import 'features/02_auth/presentation/screens/auth_screen.dart';
 import 'features/03_today/presentation/screens/join_group_screen.dart';
 import 'features/03_today/presentation/screens/today_screen.dart';
@@ -59,7 +58,6 @@ class _MyAppState extends State<MyApp> {
       ),
       routes: {
         '/': (context) => AnimatedSplashScreen(),
-        '/welcome': (context) => WelcomeTourPage(),
         '/login': (context) => LoginPage(),
         '/home': (context) => StudentTodayScreen(),
         '/egp-levels': (context) => StudentsEgpLevelsScreen(),
