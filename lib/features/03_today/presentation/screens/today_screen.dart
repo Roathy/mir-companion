@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -40,11 +38,8 @@ final studentTodayProvider =
         "Authorization": "Bearer $authToken",
       }),
     );
-    log('Student today data: ${response.data}');
     return response.data['data'];
-  } catch (e, stackTrace) {
-    log('Error fetching student today data: $e');
-    log('Stack trace: $stackTrace');
+  } catch (e) {
     return null;
   }
 });
@@ -90,7 +85,6 @@ class _StudentTodayScreenState extends ConsumerState<StudentTodayScreen>
                 return const NoProfileData();
               } else {
                 final egp = profileData['actividades_siguientes']['egp'];
-                debugPrint('egp: $egp');
                 final String activityBgImgUrl = egp['cover_actividad'];
 
                 return PopScope(
@@ -194,10 +188,6 @@ class _StudentTodayScreenState extends ConsumerState<StudentTodayScreen>
                                             final lastActivityId =
                                                 lastActivityStats[
                                                     'id_actividad'];
-                                            debugPrint(
-                                                'currentActivityId: $currentActivityId');
-                                            debugPrint(
-                                                'lastActivityId: $lastActivityId');
                                             if (currentActivityId >
                                                 lastActivityId) {
                                               final String activityQuery =
@@ -250,8 +240,6 @@ class _StudentTodayScreenState extends ConsumerState<StudentTodayScreen>
                                                         final String
                                                             queryParam =
                                                             '${egp['nivel_tag']}/u${egp['int_unidad']}';
-                                                        debugPrint(
-                                                            'queryParam: $queryParam');
                                                         ref
                                                             .read(
                                                                 unitParamProvider

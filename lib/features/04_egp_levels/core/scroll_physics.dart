@@ -19,7 +19,7 @@ class FreeScrollPhysics extends ScrollPhysics {
     return ClampingScrollSimulation(
       position: position.pixels,
       velocity: velocity,
-      tolerance: tolerance,
+      tolerance: toleranceFor(position),
     );
   }
 

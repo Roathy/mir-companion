@@ -234,6 +234,7 @@ class _LevelDetailsCardState extends ConsumerState<LevelDetailsCard>
               }));
 
       if (result == true) {
+        // ignore: unused_result
         ref.refresh(studentEGPProvider);
       }
     }

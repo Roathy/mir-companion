@@ -78,6 +78,10 @@ class UserDataNotifier extends StateNotifier<AsyncValue<UserData>> {
     state = const AsyncValue.loading();
     _fetchUserData();
   }
+
+  void clear() {
+    state = const AsyncValue.loading();
+  }
 }
 
 final userDataProvider =

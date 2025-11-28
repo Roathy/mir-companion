@@ -17,11 +17,14 @@ class NoProfileData extends ConsumerWidget {
       // debugPrint('Error logging out from server: $e');
     }
     ref.read(authTokenProvider.notifier).state = '';
-    ref.read(userDataProvider.notifier).state = const AsyncValue.loading();
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => const LoginPage()),
-      (Route<dynamic> route) => false,
-    );
+    ref.read(userDataProvider.notifier).clear();
+    
+    if (context.mounted) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const LoginPage()),
+        (Route<dynamic> route) => false,
+      );
+    }
   }
 
   @override

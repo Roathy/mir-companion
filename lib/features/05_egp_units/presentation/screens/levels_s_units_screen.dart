@@ -55,7 +55,6 @@ class LevelsSUnitsScreen extends ConsumerWidget {
       data: (userData) {
         return levelsAsync.when(
             data: (unitsData) {
-              debugPrint('unitsData: $unitsData');
               if (unitsData == null) {
                 return const Scaffold(
                   body: SafeArea(child: Center(child: Text('No units found'))),

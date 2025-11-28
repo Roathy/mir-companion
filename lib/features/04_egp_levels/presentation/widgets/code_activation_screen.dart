@@ -46,7 +46,7 @@ class _CodeActivationScreenState extends State<CodeActivationScreen> {
             type: MaterialType.transparency,
             child: Stack(children: [
               Positioned.fill(
-                  child: Container(color: Colors.black.withOpacity(0.3))),
+                  child: Container(color: Colors.black.withValues(alpha: 0.3))),
               Container(
                   height: MediaQuery.of(context).size.height * 0.72,
                   margin:
@@ -210,22 +210,28 @@ class CancelSubmitButtons extends ConsumerWidget {
                             final response = await ref
                                 .read(authServiceProvider)
                                 .unlockLevel(activationController.text);
-                            setLoading(false);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(response['message'] ?? 'Level unlocked successfully!'),
-                                backgroundColor: Colors.green,
-                              ),
-                            );
-                            Navigator.pop(context, true); // Return true to indicate success
+                            
+                            if (context.mounted) {
+                              setLoading(false);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(response['message'] ??
+                                      'Level unlocked successfully!'),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                              Navigator.pop(context, true); // Return true to indicate success
+                            }
                           } catch (e) {
-                            setLoading(false);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(e.toString()),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
+                            if (context.mounted) {
+                              setLoading(false);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(e.toString()),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
                           }
                         },
                   style: ElevatedButton.styleFrom(

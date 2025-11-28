@@ -144,6 +144,8 @@ class LoginPageState extends ConsumerState<LoginPage> {
       // This is the only addition within this method.
       // It runs only after a successful login and before navigation.
       SharedPreferences prefs = await SharedPreferences.getInstance();
+      if (!mounted) return;
+
       if (_rememberMe) {
         await prefs.setString('email', _emailController.text.trim());
         await _storage.write(
@@ -155,11 +157,13 @@ class LoginPageState extends ConsumerState<LoginPage> {
       // --- END OF ADDITION ---
 
       // YOUR ORIGINAL SUCCESS AND NAVIGATION LOGIC IS PRESERVED AND UNTOUCHED
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text("Login successful! Redirecting..."),
-            duration: Duration(seconds: 2)),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text("Login successful! Redirecting..."),
+              duration: Duration(seconds: 2)),
+        );
+      }
 
       Future.delayed(const Duration(seconds: 2), () {
         if (mounted) {

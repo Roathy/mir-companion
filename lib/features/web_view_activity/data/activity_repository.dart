@@ -56,7 +56,7 @@ class ActivityRepository {
           'message': 'Network issue. Please check your connection.'
         }
       };
-    } catch (e, stackTrace) {
+    } catch (e) {
       return {
         'success': false,
         'error': {

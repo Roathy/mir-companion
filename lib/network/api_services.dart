@@ -10,7 +10,7 @@ class ApiService {
     if(email.isEmpty || password.isEmpty){
       return null;
     }
-
+    return null; // Explicitly return null if no other return path is taken
   }
 }
 

@@ -200,8 +200,10 @@ class _WebViewActivityState extends ConsumerState<WebViewActivity> {
         // Le pasamos el 'ref' del State.
         actionHandlers[action]!(ref);
       } else {
+        // Unhandled action
       }
     } catch (e) {
+      // Error handling JavaScript message
     }
   }
 
@@ -384,6 +386,7 @@ class NoActivityAttemptsNotice extends ConsumerWidget {
                                   try {
                                     await notifier.buyAttempt(activityId!);
                                   } catch (e) {
+                                    // Error buying attempt
                                   }
                                 },
                           style: ButtonStyle(
