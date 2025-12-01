@@ -74,7 +74,7 @@ class _WebViewActivityState extends ConsumerState<WebViewActivity> {
 
     return PopScope(
       canPop: false,
-      onPopInvoked: (bool didPop) async {
+      onPopInvokedWithResult: (bool didPop, dynamic result) async {
         if (didPop) return;
         final bool shouldExit = await _showExitConfirmationDialog(context);
         if (shouldExit) {
@@ -203,7 +203,13 @@ class _WebViewActivityState extends ConsumerState<WebViewActivity> {
         // Unhandled action
       }
     } catch (e) {
-      // Error handling JavaScript message
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Communication error with activity: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -383,11 +389,7 @@ class NoActivityAttemptsNotice extends ConsumerWidget {
                                   if (activityId == null || activityId! <= 0) {
                                     return;
                                   }
-                                  try {
-                                    await notifier.buyAttempt(activityId!);
-                                  } catch (e) {
-                                    // Error buying attempt
-                                  }
+                                  await notifier.buyAttempt(activityId!);
                                 },
                           style: ButtonStyle(
                             alignment: Alignment.center,

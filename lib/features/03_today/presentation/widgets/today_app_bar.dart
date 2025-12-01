@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mironline/services/providers.dart';
+import '../../../../services/user_data_provider.dart';
 
 import '../../../02_auth/presentation/screens/auth_screen.dart';
 
@@ -60,32 +61,37 @@ class TodayAppBar extends StatelessWidget implements PreferredSizeWidget {
                     if (value == 3) {
                       try {
                         await ref.read(authServiceProvider).logoutUser();
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Logout successful!'),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content:
+                                  Text('Error al cerrar sesión: ${e.toString()}'),
+                              backgroundColor: Colors.red,
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                        }
+                      }
 
-                        if (!context.mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Logout successful!'),
-                            duration: Duration(seconds: 2),
-                          ),
-                        );
+                      // Always perform local cleanup and navigation
+                      ref.read(authTokenProvider.notifier).state = '';
+                      ref.read(userDataProvider.notifier).clear();
 
-                        // Redirige al login después de un pequeño delay
-                        await Future.delayed(const Duration(milliseconds: 500));
-                        if (!context.mounted) return;
+                      // Navigate immediately
+                      if (context.mounted) {
                         Navigator.of(context).pushAndRemoveUntil(
                           MaterialPageRoute(
                               builder: (context) => const LoginPage()),
                           (Route<dynamic> route) => false,
-                        );
-                      } catch (e) {
-                        if (!context.mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content:
-                                Text('Error al cerrar sesión: ${e.toString()}'),
-                            backgroundColor: Colors.red,
-                            duration: const Duration(seconds: 2),
-                          ),
                         );
                       }
                     }
