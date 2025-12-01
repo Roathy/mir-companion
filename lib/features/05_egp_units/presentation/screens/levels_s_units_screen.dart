@@ -13,31 +13,25 @@ import '../../../06_unit_activities/presentation/screens/unit_activities_screen.
 
 final studentLevelUnits = FutureProvider.autoDispose
     .family<Map<String, dynamic>?, String>((ref, queryParam) async {
-  try {
-    final apiClient = ref.watch(apiClientProvider);
-    final authToken = ref.read(authTokenProvider);
+  final apiClient = ref.watch(apiClientProvider);
+  final authToken = ref.read(authTokenProvider);
 
-    if (authToken.isEmpty) {
-      // TODO: Add proper error handling
-      // debugPrint("No auth token found");
-      return null;
-    }
-
-    String fullUrl =
-        "${ApiEndpoints.baseURL}${ApiEndpoints.studentsEgp}/$queryParam";
-
-    Response response = await apiClient.dio.get(fullUrl,
-        options: Options(headers: {
-          "X-Requested-With": "XMLHttpRequest",
-          "X-App-MirHorizon": createMD5Hash(),
-          "Authorization": "Bearer $authToken",
-        }));
-    return response.data['data'];
-  } catch (e) {
-    // TODO: Add proper error handling
-    // debugPrint("Error fetching student EGP levels's [units]: $e");
-    return null;
+  if (authToken.isEmpty) {
+    // TODO: Add proper error handling (this will now propagate as an error too)
+    // debugPrint("No auth token found");
+    throw Exception("No authentication token found.");
   }
+
+  String fullUrl =
+      "${ApiEndpoints.baseURL}${ApiEndpoints.studentsEgp}/$queryParam";
+
+  Response response = await apiClient.dio.get(fullUrl,
+      options: Options(headers: {
+        "X-Requested-With": "XMLHttpRequest",
+        "X-App-MirHorizon": createMD5Hash(),
+        "Authorization": "Bearer $authToken",
+      }));
+  return response.data['data'];
 });
 
 final unitParamProvider = StateProvider<String?>((ref) => null);
