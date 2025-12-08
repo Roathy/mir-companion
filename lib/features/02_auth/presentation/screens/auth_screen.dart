@@ -19,7 +19,7 @@ import '../../../03_today/presentation/screens/today_screen.dart';
 import '../widgets/widgets.dart';
 import '../providers/auth_providers.dart'; // Add this import
 
-enum LoginStatus { success, failure, error }
+enum LoginStatus { success, failure, error, cancelled }
 
 class LoginResult {
   final LoginStatus status;
@@ -86,65 +86,7 @@ Future<LoginResult> login(WidgetRef ref, String email, String password) async {
       message: "Login failed due to an unknown error");
 }
 
-Future<LoginResult> _handleGoogleLogin(WidgetRef ref) async {
-  // Version 7.x requirement: Use the singleton instance.
-  final GoogleSignIn googleSignIn = GoogleSignIn.instance;
-  try {
-    // Version 7.x requirement: Initialize with scopes before use.
-    await googleSignIn.initialize(
-      serverClientId:
-          "193821833090-pmg63ofak941ib102bop05fgp3i6uih2.apps.googleusercontent.com",
-    );
 
-    final googleUser = await googleSignIn.authenticate();
-
-    final GoogleSignInAuthentication googleAuth = googleUser.authentication;
-
-    if (googleAuth.idToken == null) {
-      return LoginResult(
-          status: LoginStatus.failure,
-          message: "Failed to get Google ID token.");
-    }
-
-    // Use the new repository to handle the login
-    final token = await ref
-        .read(authRepositoryProvider)
-        .loginWithGoogle(googleAuth.idToken!);
-
-    if (token.isNotEmpty) {
-      final storage = FlutterSecureStorage();
-      await storage.write(key: 'auth_token', value: token);
-
-      ref.read(authTokenProvider.notifier).state = token;
-      return LoginResult(status: LoginStatus.success);
-    }
-  } on GoogleSignInException catch (e) {
-    print("Google Sign-In Exception: $e (Code: ${e.code})");
-    return LoginResult(
-        status: LoginStatus.failure, message: "Google Sign-In failed: $e");
-  } on DioException catch (e) {
-    print(
-        "Dio Exception during Google Login: ${e.response?.data ?? e.message}");
-    final errorMessage =
-        e.response?.data['error']['message'] ?? e.response?.data['message'];
-    return LoginResult(
-        status: LoginStatus.failure,
-        message: errorMessage ?? 'Google Login failed due to network issue.');
-  } catch (e, stackTrace) {
-    // Generic catch-all for any other exceptions
-    print("Unexpected Google Login Error: $e");
-    print("Stack Trace: $stackTrace");
-    return LoginResult(status: LoginStatus.error, message: e.toString());
-  } finally {
-    // Always sign out from GoogleSignIn client after attempting backend login
-    // to allow users to choose a different Google account next time.
-    await googleSignIn.signOut();
-  }
-
-  return LoginResult(
-      status: LoginStatus.failure,
-      message: "Google Login failed due to an unknown error");
-}
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -159,6 +101,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
 
   // --- NEW: STATE AND INITIALIZATION LOGIC ---
   bool _rememberMe = false;
+  bool _isGoogleLoginLoading = false; // New state for Google Login loading
   final _storage = const FlutterSecureStorage();
 
   @override
@@ -243,6 +186,123 @@ class LoginPageState extends ConsumerState<LoginPage> {
     }
   }
 
+  Future<void> _onGoogleLogin() async {
+    if (_isGoogleLoginLoading) return; // Prevent multiple taps
+
+    setState(() {
+      _isGoogleLoginLoading = true;
+    });
+
+    LoginResult result = LoginResult(status: LoginStatus.failure); // Default to failure
+
+    final GoogleSignIn googleSignIn = GoogleSignIn.instance;
+    try {
+      await googleSignIn.initialize(
+        serverClientId:
+            "193821833090-pmg63ofak941ib102bop05fgp3i6uih2.apps.googleusercontent.com",
+      );
+
+      final googleUser = await googleSignIn.authenticate();
+
+      if (googleUser == null) {
+        // User cancelled by dismissing the overlay (e.g., hitting back button or tapping outside)
+        result = LoginResult(status: LoginStatus.cancelled, message: "Google Login cancelled.");
+      } else { // Only proceed if googleUser is not null
+        final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+
+        if (googleAuth.idToken == null) {
+          result = LoginResult(
+              status: LoginStatus.failure,
+              message: "Failed to get Google ID token."); 
+        } else {
+          final token = await ref
+              .read(authRepositoryProvider)
+              .loginWithGoogle(googleAuth.idToken!);
+
+          if (token.isNotEmpty) {
+            final storage = FlutterSecureStorage();
+            await storage.write(key: 'auth_token', value: token);
+
+            ref.read(authTokenProvider.notifier).state = token;
+            result = LoginResult(status: LoginStatus.success);
+          } else {
+            result = LoginResult(
+                status: LoginStatus.failure,
+                message: "Google Login failed: Token not received from backend."); 
+          }
+        }
+      }
+    } on GoogleSignInException catch (e) {
+      print("Google Sign-In Exception: $e (Code: ${e.code})");
+      // Check if the error code explicitly indicates user cancellation
+      if (e.code.toString().toLowerCase().contains('cancel')) { 
+        result = LoginResult(status: LoginStatus.cancelled, message: "Google Login cancelled.");
+      } else {
+        result = LoginResult(
+            status: LoginStatus.failure, message: "Google Sign-In failed (code: ${e.code})"); 
+      }
+    } on DioException catch (e) {
+      print(
+          "Dio Exception during Google Login: ${e.response?.data ?? e.message}");
+      final errorMessage =
+          e.response?.data['error']['message'] ?? e.response?.data['message'];
+      result = LoginResult(
+          status: LoginStatus.failure,
+          message: errorMessage ?? 'Network error during Google Login.'); 
+    } catch (e, stackTrace) {
+      print("Unexpected Google Login Error: $e");
+      print("Stack Trace: $stackTrace");
+      result = LoginResult(status: LoginStatus.error, message: "An unexpected error occurred. Please try again."); 
+    } finally {
+      // Always sign out from GoogleSignIn client after attempting backend login
+      // to allow users to choose a different Google account next time.
+      await googleSignIn.signOut();
+      if (mounted) {
+        setState(() {
+          _isGoogleLoginLoading = false;
+        });
+      }
+    }
+
+    // --- Unified SnackBar display logic ---
+    if (!mounted) return; // Check mounted again after async operations
+
+    if (result.status == LoginStatus.success) {
+      ref.read(userDataProvider.notifier).refresh();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text("Google Login successful! Redirecting..."),
+            duration: Duration(seconds: 2)),
+      );
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const StudentTodayScreen()),
+          );
+        }
+      });
+    } else if (result.status == LoginStatus.cancelled) {
+       ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(result.message ?? "Google Login cancelled."), // Fallback
+            duration: const Duration(seconds: 2)),
+      );
+    } else if (result.status == LoginStatus.failure) { // General failure (e.g., backend error, token missing)
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(result.message ?? "Google Login failed."), // Fallback
+            duration: const Duration(seconds: 2)),
+      );
+    } else if (result.status == LoginStatus.error) { // Unexpected error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(result.message ?? "An unexpected error occurred."), // Fallback
+            duration: const Duration(seconds: 2)),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -276,38 +336,8 @@ class LoginPageState extends ConsumerState<LoginPage> {
                               ),
                             ),
                             GoogleLoginButton(
-                              onPressed: () async {
-                                LoginResult result =
-                                    await _handleGoogleLogin(ref);
-                                if (!mounted) return;
-                                if (result.status == LoginStatus.success) {
-                                  ref.read(userDataProvider.notifier).refresh();
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        content: Text(
-                                            "Google Login successful! Redirecting..."),
-                                        duration: Duration(seconds: 2)),
-                                  );
-                                  Future.delayed(const Duration(seconds: 2),
-                                      () {
-                                    if (mounted) {
-                                      Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                const StudentTodayScreen()),
-                                      );
-                                    }
-                                  });
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                        content: Text(result.message ??
-                                            "Google Login failed."),
-                                        duration: const Duration(seconds: 2)),
-                                  );
-                                }
-                              },
+                              onPressed: _onGoogleLogin, // Updated to call new method
+                              isLoading: _isGoogleLoginLoading, // Pass loading state
                             ),
                             OrDivider(),
                             Row(
