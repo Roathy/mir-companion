@@ -9,7 +9,7 @@ import '../../../../network/api_endpoints.dart';
 import '../../../../services/providers.dart';
 import '../../../../services/refresh_provider.dart';
 import '../../../../services/user_data_provider.dart';
-import '../../../02_auth/presentation/screens/auth_screen.dart';
+
 import '../../../05_egp_units/presentation/screens/levels_s_units_screen.dart';
 import '../../../06_unit_activities/presentation/screens/unit_activities_screen.dart';
 import '../../../web_view_activity/presentation/screens/webview_activity_screen.dart';

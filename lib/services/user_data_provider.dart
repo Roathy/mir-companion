@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
 import '../core/utils/crypto.dart';
-import '../features/02_auth/presentation/screens/auth_screen.dart';
+
 import '../network/api_endpoints.dart';
 import 'providers.dart';
 

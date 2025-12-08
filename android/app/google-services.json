@@ -14,7 +14,15 @@
       },
       "oauth_client": [
         {
-          "client_id": "193821833090-4epmji8u7np5sbt2icj06jrfvgi62olq.apps.googleusercontent.com",
+          "client_id": "193821833090-2f4b8kmgo6imqs47e2c6gplttht73l8h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "io.mironline.mir_companion_app",
+            "certificate_hash": "2fcf1a6a59c1a3b1cacc3c7ecb89ee734a488e5c"
+          }
+        },
+        {
+          "client_id": "193821833090-pmg63ofak941ib102bop05fgp3i6uih2.apps.googleusercontent.com",
           "client_type": 3
         }
       ],

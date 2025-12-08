@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class GoogleLoginButton extends StatelessWidget {
-  const GoogleLoginButton({super.key});
+  final VoidCallback? onPressed;
+  const GoogleLoginButton({super.key, this.onPressed});
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
         width: double.infinity,
         child: OutlinedButton.icon(
-            onPressed: null,
+            onPressed: onPressed,
             icon: Image.asset("assets/images/google_logo.png", height: 24),
             label: Text("Login with Google",
                 style: GoogleFonts.poppins(fontSize: 16)),

@@ -1,7 +1,8 @@
 import 'package:app_set_id/app_set_id.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
-import '../features/02_auth/presentation/screens/auth_screen.dart';
+
 import '../network/api_client.dart';
 import 'auth_service.dart';
 import 'device-id/device_info_repo_impl.dart';
@@ -25,6 +26,8 @@ final authServiceProvider = Provider<AuthService>((ref) {
 });
 
 // final dioProvider = Provider<ApiClient>((ref) => ApiClient());
+
+final authTokenProvider = StateProvider<String>((ref) => "");
 
 final apiClientProvider = Provider<ApiClient>((ref) {
   final authToken = ref.watch(authTokenProvider);

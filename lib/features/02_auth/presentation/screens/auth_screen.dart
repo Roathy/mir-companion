@@ -7,6 +7,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:google_sign_in/google_sign_in.dart'; // Add this import // Add this import
+
 import '../../../../core/utils/utils.dart';
 import '../../../../network/api_endpoints.dart';
 import '../../../../services/device-id/device_info_repo_impl.dart';
@@ -15,6 +17,7 @@ import '../../../../services/providers.dart';
 import '../../../../services/user_data_provider.dart';
 import '../../../03_today/presentation/screens/today_screen.dart';
 import '../widgets/widgets.dart';
+import '../providers/auth_providers.dart'; // Add this import
 
 enum LoginStatus { success, failure, error }
 
@@ -24,8 +27,6 @@ class LoginResult {
 
   LoginResult({required this.status, this.message});
 }
-
-final authTokenProvider = StateProvider<String>((ref) => "");
 
 Future<LoginResult> login(WidgetRef ref, String email, String password) async {
   if (email.isEmpty || password.isEmpty) {
@@ -83,6 +84,66 @@ Future<LoginResult> login(WidgetRef ref, String email, String password) async {
   return LoginResult(
       status: LoginStatus.failure,
       message: "Login failed due to an unknown error");
+}
+
+Future<LoginResult> _handleGoogleLogin(WidgetRef ref) async {
+  // Version 7.x requirement: Use the singleton instance.
+  final GoogleSignIn googleSignIn = GoogleSignIn.instance;
+  try {
+    // Version 7.x requirement: Initialize with scopes before use.
+    await googleSignIn.initialize(
+      serverClientId:
+          "193821833090-pmg63ofak941ib102bop05fgp3i6uih2.apps.googleusercontent.com",
+    );
+
+    final googleUser = await googleSignIn.authenticate();
+
+    final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+
+    if (googleAuth.idToken == null) {
+      return LoginResult(
+          status: LoginStatus.failure,
+          message: "Failed to get Google ID token.");
+    }
+
+    // Use the new repository to handle the login
+    final token = await ref
+        .read(authRepositoryProvider)
+        .loginWithGoogle(googleAuth.idToken!);
+
+    if (token.isNotEmpty) {
+      final storage = FlutterSecureStorage();
+      await storage.write(key: 'auth_token', value: token);
+
+      ref.read(authTokenProvider.notifier).state = token;
+      return LoginResult(status: LoginStatus.success);
+    }
+  } on GoogleSignInException catch (e) {
+    print("Google Sign-In Exception: $e (Code: ${e.code})");
+    return LoginResult(
+        status: LoginStatus.failure, message: "Google Sign-In failed: $e");
+  } on DioException catch (e) {
+    print(
+        "Dio Exception during Google Login: ${e.response?.data ?? e.message}");
+    final errorMessage =
+        e.response?.data['error']['message'] ?? e.response?.data['message'];
+    return LoginResult(
+        status: LoginStatus.failure,
+        message: errorMessage ?? 'Google Login failed due to network issue.');
+  } catch (e, stackTrace) {
+    // Generic catch-all for any other exceptions
+    print("Unexpected Google Login Error: $e");
+    print("Stack Trace: $stackTrace");
+    return LoginResult(status: LoginStatus.error, message: e.toString());
+  } finally {
+    // Always sign out from GoogleSignIn client after attempting backend login
+    // to allow users to choose a different Google account next time.
+    await googleSignIn.signOut();
+  }
+
+  return LoginResult(
+      status: LoginStatus.failure,
+      message: "Google Login failed due to an unknown error");
 }
 
 class LoginPage extends ConsumerStatefulWidget {
@@ -205,7 +266,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
                       child: Padding(
                           padding: const EdgeInsets.symmetric(
                               vertical: 20, horizontal: 16),
-                          child: Column(spacing: 12,children: [
+                          child: Column(spacing: 12, children: [
                             Text(
                               "Student Login",
                               style: GoogleFonts.poppins(
@@ -214,7 +275,40 @@ class LoginPageState extends ConsumerState<LoginPage> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            GoogleLoginButton(),
+                            GoogleLoginButton(
+                              onPressed: () async {
+                                LoginResult result =
+                                    await _handleGoogleLogin(ref);
+                                if (!mounted) return;
+                                if (result.status == LoginStatus.success) {
+                                  ref.read(userDataProvider.notifier).refresh();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text(
+                                            "Google Login successful! Redirecting..."),
+                                        duration: Duration(seconds: 2)),
+                                  );
+                                  Future.delayed(const Duration(seconds: 2),
+                                      () {
+                                    if (mounted) {
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                const StudentTodayScreen()),
+                                      );
+                                    }
+                                  });
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text(result.message ??
+                                            "Google Login failed."),
+                                        duration: const Duration(seconds: 2)),
+                                  );
+                                }
+                              },
+                            ),
                             OrDivider(),
                             Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
