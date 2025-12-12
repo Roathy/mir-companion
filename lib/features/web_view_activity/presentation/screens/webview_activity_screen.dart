@@ -9,7 +9,6 @@ import '../../../../core/utils/format_buy_msg.dart';
 import '../../../06_unit_activities/presentation/screens/unit_activities_screen.dart';
 import '../../domain/providers.dart';
 
-// PASO 1: Convertido a ConsumerStatefulWidget
 class WebViewActivity extends ConsumerStatefulWidget {
   final String activityQuery;
   const WebViewActivity({super.key, required this.activityQuery});
@@ -18,7 +17,6 @@ class WebViewActivity extends ConsumerStatefulWidget {
   ConsumerState<WebViewActivity> createState() => _WebViewActivityState();
 }
 
-// PASO 2: Toda la lógica ahora vive en la clase State
 class _WebViewActivityState extends ConsumerState<WebViewActivity> {
   static const Map<String, String> specialCases = {
     'out-of-tries-30': 'Use 30 mircoins to purchase an extra attempt',
@@ -31,25 +29,18 @@ class _WebViewActivityState extends ConsumerState<WebViewActivity> {
     'out-of-tries-65': 'Use 65 mircoins to purchase an extra attempt',
   };
 
-  // PASO 3: El controller se declara aquí y se inicializa en initState
   late final WebViewController _webViewCtrl;
 
   @override
   void initState() {
     super.initState();
-    // Se inicializa una SOLA VEZ
     _webViewCtrl = WebViewController();
   }
 
-  // PASO 4: Centralizamos la lógica de salida
   void _exitActivity() {
-    // 1. Invalida el estado como antes. Esta acción es síncrona y rápida.
     ref.invalidate(studentUnitsActivities);
 
-    // 2. Programa la navegación para que ocurra después de que el frame actual se complete.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // 3. La comprobación 'mounted' es extra importante aquí,
-      // ya que esto se ejecuta un poco más tarde.
       if (mounted) {
         Navigator.pop(context);
       }
@@ -58,16 +49,11 @@ class _WebViewActivityState extends ConsumerState<WebViewActivity> {
 
   @override
   Widget build(BuildContext context) {
-    // Usamos widget.activityQuery para acceder a los parámetros del widget
     final asyncActivity = ref.watch(unitActivityProvider(widget.activityQuery));
 
     final Map<String, void Function(WidgetRef)> actionHandlers = {
-      // Ahora llaman a la función centralizada
       'finishButtonClick': (_) => _exitActivity(),
-      // 2. 'retryButtonClick' ahora tiene su propia lógica específica.
       'retryButtonClick': (ref) {
-        // Invalida el provider para forzar una nueva llamada a la API y recargar los datos.
-        // La UI se reconstruirá automáticamente gracias a ref.watch().
         ref.invalidate(unitActivityProvider(widget.activityQuery));
       },
     };
@@ -135,8 +121,7 @@ class _WebViewActivityState extends ConsumerState<WebViewActivity> {
         null) {
       return _buildWebView(activityData, actionHandlers);
     } else {
-      final errorMessage =
-          message ?? 'An unexpected error occurred.';
+      final errorMessage = message ?? 'An unexpected error occurred.';
       return NoActivityAttemptsNotice(canBuy: false, message: errorMessage);
     }
   }
@@ -148,13 +133,11 @@ class _WebViewActivityState extends ConsumerState<WebViewActivity> {
     final activityUrl = Uri.decodeFull(
         activityData['data']['actividad']['_links']['self']['href']);
 
-    // El controller ya solo lo configuramos.
     _webViewCtrl
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..addJavaScriptChannel(
         'MironlineChannel',
         onMessageReceived: (javaScriptMsg) {
-          // Ahora 'ref' está disponible en todo el State, por lo que la llamada es válida.
           _handleJavaScriptMsg(javaScriptMsg, actionHandlers);
         },
       )
@@ -172,22 +155,18 @@ class _WebViewActivityState extends ConsumerState<WebViewActivity> {
   }
 
   void _applyPlatformScrollSettings() {
-    // Lógica condicional para acceder y configurar la API de plataforma
     if (_webViewCtrl.platform is AndroidWebViewController) {
       final AndroidWebViewController androidController =
           _webViewCtrl.platform as AndroidWebViewController;
 
-      // Android: habilitar el efecto elástico (Overscroll)
       androidController.setOverScrollMode(
         WebViewOverScrollMode.always,
       );
 
-      // Opcional: Deshabilitar la barra de desplazamiento vertical si se desea una apariencia más limpia
       androidController.setVerticalScrollBarEnabled(false);
     }
   }
 
-  // Ahora no necesita 'ref' como parámetro, porque ya es parte del State.
   void _handleJavaScriptMsg(
     JavaScriptMessage javaScriptMsg,
     Map<String, void Function(WidgetRef)> actionHandlers,
@@ -197,7 +176,6 @@ class _WebViewActivityState extends ConsumerState<WebViewActivity> {
           jsonDecode(javaScriptMsg.message);
       final String action = messageData['action'];
       if (actionHandlers.containsKey(action)) {
-        // Le pasamos el 'ref' del State.
         actionHandlers[action]!(ref);
       } else {
         // Unhandled action
@@ -212,8 +190,6 @@ class _WebViewActivityState extends ConsumerState<WebViewActivity> {
       );
     }
   }
-
-// Dentro de tu clase _WebViewActivityState
 
   void _injectJavaScript(WebViewController controller) {
     controller.runJavaScript('''
